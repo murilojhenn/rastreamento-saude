@@ -1,35 +1,443 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Rastreamento de Resíduos Hospitalares</title>
+  <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: #f4f7fb;
+      color: #1f2937;
+    }
+
+    .topo {
+      background: linear-gradient(135deg, #0f766e, #0ea5a4);
+      color: white;
+      padding: 24px 16px;
+      text-align: center;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.12);
+    }
+
+    .topo h1 {
+      margin: 0;
+      font-size: 28px;
+    }
+
+    .topo p {
+      margin: 8px 0 0;
+      font-size: 15px;
+      opacity: 0.95;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 24px auto;
+      padding: 16px;
+    }
+
+    .card {
+      background: white;
+      border-radius: 16px;
+      padding: 18px;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.08);
+      margin-bottom: 18px;
+    }
+
+    .card h2 {
+      margin-top: 0;
+      font-size: 22px;
+      color: #0f766e;
+    }
+
+    .linha {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    input {
+      flex: 1;
+      min-width: 220px;
+      padding: 14px;
+      border: 1px solid #cbd5e1;
+      border-radius: 12px;
+      font-size: 16px;
+      outline: none;
+    }
+
+    input:focus {
+      border-color: #0ea5a4;
+      box-shadow: 0 0 0 3px rgba(14,165,164,0.15);
+    }
+
+    button {
+      padding: 14px 18px;
+      border: none;
+      border-radius: 12px;
+      font-size: 15px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .btn-buscar {
+      background: #0f766e;
+      color: white;
+    }
+
+    .btn-limpar {
+      background: #e5e7eb;
+      color: #111827;
+    }
+
+    .btn-gerar {
+      background: #2563eb;
+      color: white;
+      margin-top: 10px;
+    }
+
+    .resultado {
+      margin-top: 18px;
+      display: none;
+    }
+
+    .resultado.ativo {
+      display: block;
+    }
+
+    .bloco-info {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 12px;
+      margin-top: 16px;
+    }
+
+    .info {
+      background: #f8fafc;
+      border-left: 5px solid #0ea5a4;
+      border-radius: 12px;
+      padding: 12px;
+    }
+
+    .info strong {
+      display: block;
+      margin-bottom: 6px;
+      color: #0f172a;
+      font-size: 14px;
+      text-transform: uppercase;
+    }
+
+    .status {
+      font-weight: bold;
+    }
+
+    .status.transporte {
+      color: #d97706;
+    }
+
+    .status.descartado {
+      color: #059669;
+    }
+
+    .status.analise {
+      color: #2563eb;
+    }
+
+    .erro {
+      margin-top: 16px;
+      background: #fee2e2;
+      color: #991b1b;
+      padding: 14px;
+      border-radius: 12px;
+      display: none;
+    }
+
+    .erro.ativo {
+      display: block;
+    }
+
+    .lista-codigos {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .codigo-item {
+      background: #ecfeff;
+      border: 1px solid #a5f3fc;
+      border-radius: 12px;
+      padding: 10px;
+      font-size: 14px;
+    }
+
+    .qrcode-area {
+      margin-top: 16px;
+      text-align: center;
+      display: none;
+    }
+
+    .qrcode-area.ativo {
+      display: block;
+    }
+
+    #qrcodeCanvas {
+      margin-top: 10px;
+      max-width: 100%;
+    }
+
+    .rodape {
+      text-align: center;
+      color: #64748b;
+      font-size: 13px;
+      padding: 10px 20px 30px;
+    }
+
+    @media (max-width: 600px) {
+      .topo h1 {
+        font-size: 23px;
+      }
+
+      button {
+        width: 100%;
+      }
+
+      .linha {
+        flex-direction: column;
+      }
+    }
+  </style>
 </head>
 <body>
+  <div class="topo">
+    <h1>Sistema de Rastreamento de Resíduos Hospitalares</h1>
+    <p>Consulta de origem, transporte e destino final do descarte hospitalar</p>
+  </div>
 
-<h1>Sistema de Rastreamento</h1>
+  <div class="container">
+    <div class="card">
+      <h2>Consultar resíduo</h2>
 
-<p>Digite o código do descarte:</p>
+      <div class="linha">
+        <input
+          type="text"
+          id="codigo"
+          placeholder="Digite o código do resíduo Ex: 123"
+        />
+        <button class="btn-buscar" onclick="buscar()">Buscar</button>
+        <button class="btn-limpar" onclick="limpar()">Limpar</button>
+      </div>
 
-<input type="text" id="codigo" placeholder="Ex: 123">
+      <div class="erro" id="erro">
+        Código não encontrado. Tente um dos códigos de exemplo abaixo.
+      </div>
 
-<button onclick="buscar()">Buscar</button>
+      <div class="resultado" id="resultado">
+        <div class="bloco-info">
+          <div class="info">
+            <strong>Código</strong>
+            <span id="r-codigo"></span>
+          </div>
 
-<p id="resultado"></p>
+          <div class="info">
+            <strong>Material</strong>
+            <span id="r-material"></span>
+          </div>
 
-<script>
-function buscar() {
-  let codigo = document.getElementById("codigo").value;
-  let resultado = document.getElementById("resultado");
+          <div class="info">
+            <strong>Tipo de resíduo</strong>
+            <span id="r-tipo"></span>
+          </div>
 
-  if (codigo == "123") {
-    resultado.innerHTML = "Localização: Sala de cirurgia";
-  } else if (codigo == "456") {
-    resultado.innerHTML = "Localização: Laboratório";
-  } else {
-    resultado.innerHTML = "Código não encontrado";
-  }
-}
-</script>
+          <div class="info">
+            <strong>Origem</strong>
+            <span id="r-origem"></span>
+          </div>
 
+          <div class="info">
+            <strong>Status</strong>
+            <span id="r-status" class="status"></span>
+          </div>
+
+          <div class="info">
+            <strong>Destino final</strong>
+            <span id="r-destino"></span>
+          </div>
+
+          <div class="info">
+            <strong>Responsável</strong>
+            <span id="r-responsavel"></span>
+          </div>
+
+          <div class="info">
+            <strong>Última atualização</strong>
+            <span id="r-data"></span>
+          </div>
+        </div>
+
+        <button class="btn-gerar" onclick="gerarQRCode()">Gerar QR Code deste registro</button>
+
+        <div class="qrcode-area" id="qrcodeArea">
+          <h3>QR Code do resíduo</h3>
+          <canvas id="qrcodeCanvas"></canvas>
+          <p id="linkRegistro" style="word-break: break-all; font-size: 13px; color: #475569;"></p>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Códigos de exemplo</h2>
+      <div class="lista-codigos">
+        <div class="codigo-item"><strong>123</strong><br> Lixo infectante - Sala de cirurgia</div>
+        <div class="codigo-item"><strong>456</strong><br> Material perfurocortante - Laboratório</div>
+        <div class="codigo-item"><strong>789</strong><br> Lixo comum - Recepção</div>
+        <div class="codigo-item"><strong>321</strong><br> Resíduo químico - Farmácia</div>
+        <div class="codigo-item"><strong>654</strong><br> Material contaminado - UTI</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="rodape">
+    Sistema acadêmico demonstrativo para rastreamento de resíduos hospitalares
+  </div>
+
+  <script>
+    const residuos = {
+      "123": {
+        material: "Lixo infectante",
+        tipo: "Grupo A",
+        origem: "Sala de cirurgia",
+        status: "Em transporte",
+        destino: "Incineração",
+        responsavel: "Coleta interna hospitalar",
+        data: "07/04/2026 17:20"
+      },
+      "456": {
+        material: "Material perfurocortante",
+        tipo: "Grupo E",
+        origem: "Laboratório",
+        status: "Em análise de rota",
+        destino: "Tratamento especializado",
+        responsavel: "Equipe de biossegurança",
+        data: "07/04/2026 17:22"
+      },
+      "789": {
+        material: "Lixo comum",
+        tipo: "Grupo D",
+        origem: "Recepção",
+        status: "Descartado",
+        destino: "Aterro sanitário",
+        responsavel: "Serviço de limpeza",
+        data: "07/04/2026 16:55"
+      },
+      "321": {
+        material: "Resíduo químico",
+        tipo: "Grupo B",
+        origem: "Farmácia",
+        status: "Em transporte",
+        destino: "Descarte químico controlado",
+        responsavel: "Equipe técnica externa",
+        data: "07/04/2026 17:10"
+      },
+      "654": {
+        material: "Material contaminado",
+        tipo: "Grupo A",
+        origem: "UTI",
+        status: "Descartado",
+        destino: "Incineração",
+        responsavel: "Coleta hospitalar",
+        data: "07/04/2026 15:40"
+      }
+    };
+
+    let codigoAtual = "";
+
+    function classeStatus(status) {
+      const texto = status.toLowerCase();
+
+      if (texto.includes("transporte")) return "status transporte";
+      if (texto.includes("descartado")) return "status descartado";
+      return "status analise";
+    }
+
+    function buscar() {
+      const codigo = document.getElementById("codigo").value.trim();
+      const erro = document.getElementById("erro");
+      const resultado = document.getElementById("resultado");
+      const qrcodeArea = document.getElementById("qrcodeArea");
+
+      erro.classList.remove("ativo");
+      resultado.classList.remove("ativo");
+      qrcodeArea.classList.remove("ativo");
+
+      if (!codigo || !residuos[codigo]) {
+        erro.classList.add("ativo");
+        return;
+      }
+
+      const item = residuos[codigo];
+      codigoAtual = codigo;
+
+      document.getElementById("r-codigo").textContent = codigo;
+      document.getElementById("r-material").textContent = item.material;
+      document.getElementById("r-tipo").textContent = item.tipo;
+      document.getElementById("r-origem").textContent = item.origem;
+      document.getElementById("r-status").textContent = item.status;
+      document.getElementById("r-status").className = classeStatus(item.status);
+      document.getElementById("r-destino").textContent = item.destino;
+      document.getElementById("r-responsavel").textContent = item.responsavel;
+      document.getElementById("r-data").textContent = item.data;
+
+      resultado.classList.add("ativo");
+    }
+
+    function limpar() {
+      document.getElementById("codigo").value = "";
+      document.getElementById("erro").classList.remove("ativo");
+      document.getElementById("resultado").classList.remove("ativo");
+      document.getElementById("qrcodeArea").classList.remove("ativo");
+      document.getElementById("linkRegistro").textContent = "";
+      codigoAtual = "";
+
+      const canvas = document.getElementById("qrcodeCanvas");
+      const ctx = canvas.getContext("2d");
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }
+
+    function gerarQRCode() {
+      if (!codigoAtual) return;
+
+      const url = `${window.location.origin}${window.location.pathname}?codigo=${codigoAtual}`;
+      const canvas = document.getElementById("qrcodeCanvas");
+
+      QRCode.toCanvas(canvas, url, { width: 220 }, function (error) {
+        if (error) {
+          alert("Erro ao gerar QR Code.");
+          return;
+        }
+
+        document.getElementById("qrcodeArea").classList.add("ativo");
+        document.getElementById("linkRegistro").textContent = url;
+      });
+    }
+
+    function carregarPorLink() {
+      const params = new URLSearchParams(window.location.search);
+      const codigo = params.get("codigo");
+
+      if (codigo) {
+        document.getElementById("codigo").value = codigo;
+        buscar();
+      }
+    }
+
+    carregarPorLink();
+  </script>
 </body>
 </html>
