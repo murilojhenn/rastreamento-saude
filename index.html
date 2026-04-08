@@ -4,174 +4,441 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Rastreamento Hospitalar</title>
+
   <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
   <script src="https://unpkg.com/html5-qrcode"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+
   <style>
     * { box-sizing: border-box; }
+
+    :root {
+      --bg: #f3f7fb;
+      --card: #ffffff;
+      --card-soft: #f8fbff;
+      --text: #1f2937;
+      --muted: #64748b;
+      --border: #dbe5ef;
+      --primary: #0f766e;
+      --primary-2: #0ea5a4;
+      --blue: #2563eb;
+      --danger: #dc2626;
+      --warning-bg: #fff1f2;
+      --warning-text: #9f1239;
+      --success-bg: #ecfdf5;
+      --success-text: #065f46;
+      --shadow: 0 8px 24px rgba(15, 23, 42, .08);
+      --radius: 16px;
+    }
+
     body {
       margin: 0;
       font-family: Arial, Helvetica, sans-serif;
-      background: #f4f7fb;
-      color: #1f2937;
+      background: linear-gradient(180deg, #eef7f6 0%, var(--bg) 280px);
+      color: var(--text);
     }
+
     .topo {
       background: linear-gradient(135deg, #0f766e, #0ea5a4);
       color: #fff;
-      padding: 20px;
+      padding: 26px 18px;
       text-align: center;
+      box-shadow: 0 6px 20px rgba(14, 165, 164, .25);
     }
-    .container {
-      max-width: 1100px;
-      margin: 20px auto;
-      padding: 16px;
+
+    .topo h1 {
+      margin: 0 0 8px;
+      font-size: 28px;
     }
-    .card {
-      background: #fff;
-      border-radius: 14px;
-      padding: 18px;
-      margin-bottom: 16px;
-      box-shadow: 0 4px 14px rgba(0,0,0,.08);
-    }
-    h1, h2, h3 { margin-top: 0; }
-    input, select {
-      width: 100%;
-      padding: 12px;
-      border: 1px solid #cbd5e1;
-      border-radius: 10px;
-      margin: 6px 0 12px;
+
+    .topo p {
+      margin: 0;
+      opacity: .95;
       font-size: 15px;
     }
+
+    .container {
+      max-width: 1250px;
+      margin: 22px auto;
+      padding: 16px;
+    }
+
+    .card {
+      background: var(--card);
+      border-radius: var(--radius);
+      padding: 18px;
+      margin-bottom: 16px;
+      box-shadow: var(--shadow);
+      border: 1px solid rgba(219, 229, 239, .9);
+    }
+
+    h1, h2, h3 {
+      margin-top: 0;
+    }
+
+    .subtitulo {
+      color: var(--muted);
+      margin-top: -6px;
+      margin-bottom: 14px;
+      font-size: 14px;
+    }
+
+    label {
+      display: block;
+      font-size: 13px;
+      color: #334155;
+      font-weight: bold;
+      margin-bottom: 6px;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 12px 13px;
+      border: 1px solid #cbd5e1;
+      border-radius: 12px;
+      margin: 0 0 12px;
+      font-size: 15px;
+      outline: none;
+      background: #fff;
+      transition: .2s ease;
+    }
+
+    input:focus, select:focus {
+      border-color: var(--primary-2);
+      box-shadow: 0 0 0 3px rgba(14, 165, 164, .14);
+    }
+
     button {
       border: none;
-      border-radius: 10px;
+      border-radius: 12px;
       padding: 11px 16px;
       cursor: pointer;
       font-weight: bold;
       margin: 4px 6px 4px 0;
+      transition: .2s ease;
+      font-size: 14px;
     }
-    .btn { background: #0f766e; color: #fff; }
-    .btn2 { background: #2563eb; color: #fff; }
+
+    button:hover {
+      transform: translateY(-1px);
+    }
+
+    .btn { background: var(--primary); color: #fff; }
+    .btn2 { background: var(--blue); color: #fff; }
     .btn3 { background: #e5e7eb; color: #111827; }
-    .btn-danger { background: #dc2626; color: #fff; }
+    .btn-danger { background: var(--danger); color: #fff; }
+
     .hidden { display: none !important; }
+
     .grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
       gap: 12px;
     }
+
     .linha {
       display: flex;
       gap: 10px;
       flex-wrap: wrap;
+      align-items: end;
     }
+
     .linha > * {
       flex: 1;
       min-width: 180px;
     }
+
+    .linha-auto {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .linha-auto > * {
+      flex: unset;
+      min-width: unset;
+    }
+
+    .top-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
     .badge {
       display: inline-block;
-      padding: 5px 10px;
+      padding: 6px 11px;
       border-radius: 999px;
       font-size: 12px;
       font-weight: bold;
+      white-space: nowrap;
     }
+
     .aguardando { background: #fef3c7; color: #92400e; }
     .transporte { background: #dbeafe; color: #1d4ed8; }
     .entregue { background: #dcfce7; color: #166534; }
+
     .etiquetas {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
       gap: 12px;
     }
+
     .etiqueta {
       border: 2px dashed #0ea5a4;
-      border-radius: 12px;
-      padding: 12px;
+      border-radius: 14px;
+      padding: 14px;
       background: #f8fffe;
     }
+
+    .etiqueta h3 {
+      margin-bottom: 8px;
+    }
+
     .etiqueta canvas {
-      margin-top: 10px;
+      margin-top: 12px;
       background: #fff;
       padding: 6px;
       border-radius: 8px;
+      border: 1px solid #e5e7eb;
     }
+
     .status-boxes {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
       gap: 12px;
       margin-bottom: 14px;
     }
+
     .status-box {
-      background: #f8fafc;
-      border-left: 4px solid #0ea5a4;
-      padding: 12px;
-      border-radius: 10px;
+      background: var(--card-soft);
+      border: 1px solid #e2e8f0;
+      border-left: 5px solid var(--primary-2);
+      padding: 14px;
+      border-radius: 14px;
+      min-height: 85px;
     }
+
+    .status-box strong {
+      display: block;
+      font-size: 13px;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+
+    .status-box span {
+      font-size: 18px;
+      font-weight: bold;
+      color: var(--text);
+    }
+
+    .alerta {
+      border-radius: 12px;
+      padding: 12px 14px;
+      margin-top: 12px;
+      font-weight: bold;
+      border: 1px solid transparent;
+    }
+
+    .ok {
+      background: var(--success-bg);
+      color: var(--success-text);
+      border-color: #a7f3d0;
+    }
+
+    .warn {
+      background: #fef2f2;
+      color: #991b1b;
+      border-color: #fecaca;
+    }
+
+    .info {
+      background: #eff6ff;
+      color: #1d4ed8;
+      border-color: #bfdbfe;
+    }
+
+    .mini {
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .muted {
+      color: var(--muted);
+    }
+
+    .toolbar {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 12px;
+      align-items: end;
+    }
+
+    .toolbar > div {
+      min-width: 200px;
+      flex: 1;
+    }
+
+    .toolbar .acoes {
+      flex: unset;
+      min-width: unset;
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+      border: 1px solid #e5e7eb;
+      border-radius: 14px;
+      background: #fff;
+    }
+
     table {
       width: 100%;
       border-collapse: collapse;
-      margin-top: 10px;
+      min-width: 900px;
     }
+
     th, td {
       border-bottom: 1px solid #e5e7eb;
-      padding: 10px;
+      padding: 12px 10px;
       text-align: left;
       vertical-align: top;
       font-size: 14px;
     }
-    th { background: #f8fafc; }
-    .alerta {
-      border-radius: 10px;
-      padding: 12px;
-      margin-top: 12px;
-      font-weight: bold;
+
+    th {
+      background: #f8fafc;
+      position: sticky;
+      top: 0;
+      z-index: 1;
     }
-    .ok { background: #dcfce7; color: #166534; }
-    .warn { background: #fee2e2; color: #991b1b; }
-    .mini { font-size: 12px; color: #64748b; }
+
+    tr:hover td {
+      background: #fbfdff;
+    }
+
     #readerSaida, #readerChegada {
       margin-top: 10px;
       width: 100%;
       max-width: 360px;
+      min-height: 120px;
+      border-radius: 14px;
+      overflow: hidden;
+      background: #f8fafc;
+      border: 1px dashed #cbd5e1;
+      padding: 8px;
+    }
+
+    .login-box {
+      max-width: 420px;
+      margin: 0 auto;
+    }
+
+    .menu-info {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .historico-lista {
+      display: grid;
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .historico-item {
+      border: 1px solid #e5e7eb;
+      border-radius: 14px;
+      padding: 14px;
+      background: #fcfdff;
+    }
+
+    .historico-item strong {
+      display: block;
+      margin-bottom: 6px;
+    }
+
+    .pill {
+      display: inline-block;
+      padding: 4px 8px;
+      border-radius: 999px;
+      background: #ecfeff;
+      color: #155e75;
+      font-size: 12px;
+      font-weight: bold;
+      margin-right: 6px;
+      margin-top: 6px;
+    }
+
+    .sem-dados {
+      padding: 18px;
+      text-align: center;
+      color: var(--muted);
+      background: #fafafa;
+      border-radius: 12px;
+      border: 1px dashed #d1d5db;
+    }
+
+    @media (max-width: 700px) {
+      .topo h1 { font-size: 22px; }
+      .card { padding: 14px; }
+      button { width: 100%; margin-right: 0; }
+      .toolbar .acoes { width: 100%; }
+      .toolbar .acoes button { width: 100%; }
+      .menu-info { flex-direction: column; align-items: flex-start; }
     }
   </style>
 </head>
 <body>
   <div class="topo">
     <h1>Sistema de Rastreamento Hospitalar</h1>
-    <p>Controle interno de remessas, volumes, saída, chegada e divergência</p>
+    <p>Controle interno de remessas, volumes, saída, chegada e divergências</p>
   </div>
 
   <div class="container">
-    <div id="loginCard" class="card">
+    <div id="mensagemSistema" class="alerta hidden"></div>
+
+    <div id="loginCard" class="card login-box">
       <h2>Login</h2>
+      <p class="subtitulo">Acesse conforme seu perfil operacional</p>
+
+      <label for="loginUsuario">Usuário</label>
       <input id="loginUsuario" placeholder="Usuário" />
+
+      <label for="loginSenha">Senha</label>
       <input id="loginSenha" type="password" placeholder="Senha" />
+
       <button class="btn" onclick="fazerLogin()">Entrar</button>
       <div id="erroLogin" class="alerta warn hidden">Usuário ou senha inválidos.</div>
     </div>
 
     <div id="appArea" class="hidden">
       <div class="card">
-        <div class="linha">
+        <div class="menu-info">
           <div>
-            <strong>Usuário:</strong> <span id="usuarioLogadoTexto"></span>
+            <strong>Usuário:</strong> <span id="usuarioLogadoTexto"></span><br>
+            <span class="mini"><strong>Perfil:</strong> <span id="perfilLogadoTexto"></span></span>
           </div>
-          <div>
-            <strong>Perfil:</strong> <span id="perfilLogadoTexto"></span>
+
+          <div class="top-actions">
+            <button class="btn3" onclick="mostrarSecao('painel')">Painel</button>
+            <button class="btn3" onclick="mostrarSecao('historico')">Histórico</button>
+            <button class="btn3" onclick="mostrarSecao('admin')">Admin</button>
+            <button class="btn3" onclick="mostrarSecao('saida')">Saída</button>
+            <button class="btn3" onclick="mostrarSecao('chegada')">Chegada</button>
+            <button class="btn-danger" onclick="logout()">Sair</button>
           </div>
-        </div>
-        <div style="margin-top:10px;">
-          <button class="btn3" onclick="mostrarSecao('painel')">Painel</button>
-          <button class="btn3" onclick="mostrarSecao('admin')">Admin</button>
-          <button class="btn3" onclick="mostrarSecao('saida')">Saída</button>
-          <button class="btn3" onclick="mostrarSecao('chegada')">Chegada</button>
-          <button class="btn-danger" onclick="logout()">Sair</button>
         </div>
       </div>
 
       <div id="secaoAdmin" class="card hidden">
         <h2>Criar remessa</h2>
+        <p class="subtitulo">Cadastre a remessa e gere as etiquetas dos volumes</p>
+
         <div class="grid">
           <div>
             <label>Origem</label>
@@ -199,8 +466,11 @@
           </div>
         </div>
 
-        <button class="btn" onclick="criarRemessa()">Criar remessa</button>
-        <button class="btn3" onclick="carregarEtiquetasUltimaRemessa()">Recarregar etiquetas</button>
+        <div class="linha-auto">
+          <button class="btn" onclick="criarRemessa()">Criar remessa</button>
+          <button class="btn3" onclick="carregarEtiquetasUltimaRemessa()">Recarregar etiquetas</button>
+          <button class="btn2" onclick="exportarEtiquetasPDF()">Exportar etiquetas em PDF</button>
+        </div>
 
         <div id="notaInternaBox" class="card hidden" style="margin-top:14px; background:#f8fafc;">
           <h3>Nota interna</h3>
@@ -215,22 +485,57 @@
 
       <div id="secaoSaida" class="card hidden">
         <h2>Registrar saída</h2>
+        <p class="subtitulo">Informe manualmente ou use a câmera para leitura do QR Code</p>
+
+        <label for="codigoSaida">Código manual</label>
         <input id="codigoSaida" placeholder="Código manual" />
-        <button class="btn" onclick="registrarSaidaManual()">Registrar saída manual</button>
-        <button class="btn2" onclick="iniciarLeitorSaida()">Ler QR pela câmera</button>
+
+        <div class="linha-auto">
+          <button class="btn" onclick="registrarSaidaManual()">Registrar saída manual</button>
+          <button class="btn2" onclick="iniciarLeitorSaida()">Ler QR pela câmera</button>
+          <button class="btn3" onclick="pararLeitorSaida()">Parar leitor</button>
+        </div>
+
         <div id="readerSaida"></div>
       </div>
 
       <div id="secaoChegada" class="card hidden">
         <h2>Registrar chegada</h2>
+        <p class="subtitulo">Finalize o volume recebido manualmente ou por leitura de QR</p>
+
+        <label for="codigoChegada">Código manual</label>
         <input id="codigoChegada" placeholder="Código manual" />
-        <button class="btn" onclick="registrarChegadaManual()">Registrar chegada manual</button>
-        <button class="btn2" onclick="iniciarLeitorChegada()">Ler QR pela câmera</button>
+
+        <div class="linha-auto">
+          <button class="btn" onclick="registrarChegadaManual()">Registrar chegada manual</button>
+          <button class="btn2" onclick="iniciarLeitorChegada()">Ler QR pela câmera</button>
+          <button class="btn3" onclick="pararLeitorChegada()">Parar leitor</button>
+        </div>
+
         <div id="readerChegada"></div>
       </div>
 
       <div id="secaoPainel" class="card">
         <h2>Painel em tempo real</h2>
+        <p class="subtitulo">Acompanhe status, filtros e divergências da remessa</p>
+
+        <div class="toolbar">
+          <div>
+            <label>Filtrar por remessa</label>
+            <select id="filtroRemessa"></select>
+          </div>
+
+          <div>
+            <label>Buscar por código</label>
+            <input id="buscaCodigo" placeholder="Ex: REM-xxxx-VOL-01" />
+          </div>
+
+          <div class="acoes">
+            <label>&nbsp;</label>
+            <button class="btn3" onclick="limparFiltrosPainel()">Limpar filtros</button>
+            <button class="btn2" onclick="exportarRelatorioPDF()">Exportar relatório PDF</button>
+          </div>
+        </div>
 
         <div class="status-boxes">
           <div class="status-box"><strong>Remessa atual</strong><span id="resumoRemessa">-</span></div>
@@ -243,20 +548,29 @@
 
         <div id="alertaPainel" class="alerta ok">Nenhuma divergência encontrada.</div>
 
-        <table>
-          <thead>
-            <tr>
-              <th>Código</th>
-              <th>Status</th>
-              <th>Origem</th>
-              <th>Destino</th>
-              <th>Saída</th>
-              <th>Chegada</th>
-              <th>Tempo</th>
-            </tr>
-          </thead>
-          <tbody id="tabelaStatus"></tbody>
-        </table>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Código</th>
+                <th>Status</th>
+                <th>Origem</th>
+                <th>Destino</th>
+                <th>Material</th>
+                <th>Saída</th>
+                <th>Chegada</th>
+                <th>Tempo</th>
+              </tr>
+            </thead>
+            <tbody id="tabelaStatus"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div id="secaoHistorico" class="card hidden">
+        <h2>Histórico de remessas</h2>
+        <p class="subtitulo">Visualize rapidamente remessas já criadas no sistema</p>
+        <div id="listaHistorico" class="historico-lista"></div>
       </div>
     </div>
   </div>
@@ -297,66 +611,22 @@
     let usuarioAtual = null;
     let html5QrSaida = null;
     let html5QrChegada = null;
+    let todosVolumes = [];
+    let ultimoQrLidoSaida = "";
+    let ultimoQrLidoChegada = "";
+    let ultimaLeituraSaida = 0;
+    let ultimaLeituraChegada = 0;
 
-    window.fazerLogin = function () {
-      const usuario = document.getElementById("loginUsuario").value.trim();
-      const senha = document.getElementById("loginSenha").value.trim();
+    function mostrarMensagem(texto, tipo = "ok") {
+      const box = document.getElementById("mensagemSistema");
+      box.textContent = texto;
+      box.className = `alerta ${tipo}`;
+      box.classList.remove("hidden");
 
-      if (!usuarios[usuario] || usuarios[usuario].senha !== senha) {
-        document.getElementById("erroLogin").classList.remove("hidden");
-        return;
-      }
-
-      usuarioAtual = { nome: usuario, perfil: usuarios[usuario].perfil };
-      document.getElementById("erroLogin").classList.add("hidden");
-      document.getElementById("loginCard").classList.add("hidden");
-      document.getElementById("appArea").classList.remove("hidden");
-      document.getElementById("usuarioLogadoTexto").textContent = usuarioAtual.nome;
-      document.getElementById("perfilLogadoTexto").textContent = usuarioAtual.perfil.toUpperCase();
-
-      mostrarSecao("painel");
-
-      if (usuarioAtual.perfil === "admin") {
-        carregarEtiquetasUltimaRemessa();
-      }
-    };
-
-    window.logout = function () {
-      usuarioAtual = null;
-      document.getElementById("appArea").classList.add("hidden");
-      document.getElementById("loginCard").classList.remove("hidden");
-      document.getElementById("loginUsuario").value = "";
-      document.getElementById("loginSenha").value = "";
-    };
-
-    window.mostrarSecao = function (secao) {
-      document.getElementById("secaoAdmin").classList.add("hidden");
-      document.getElementById("secaoSaida").classList.add("hidden");
-      document.getElementById("secaoChegada").classList.add("hidden");
-      document.getElementById("secaoPainel").classList.add("hidden");
-
-      if (secao === "painel") {
-        document.getElementById("secaoPainel").classList.remove("hidden");
-        return;
-      }
-
-      if (secao === "admin") {
-        if (usuarioAtual?.perfil !== "admin") return;
-        document.getElementById("secaoAdmin").classList.remove("hidden");
-        return;
-      }
-
-      if (secao === "saida") {
-        if (!(usuarioAtual?.perfil === "saida" || usuarioAtual?.perfil === "admin")) return;
-        document.getElementById("secaoSaida").classList.remove("hidden");
-        return;
-      }
-
-      if (secao === "chegada") {
-        if (!(usuarioAtual?.perfil === "chegada" || usuarioAtual?.perfil === "admin")) return;
-        document.getElementById("secaoChegada").classList.remove("hidden");
-      }
-    };
+      setTimeout(() => {
+        box.classList.add("hidden");
+      }, 3500);
+    }
 
     function pad2(n) {
       return String(n).padStart(2, "0");
@@ -381,152 +651,326 @@
       return "badge";
     }
 
-    window.criarRemessa = async function () {
-      const origem = document.getElementById("origem").value.trim();
-      const destino = document.getElementById("destino").value.trim();
-      const cidade = document.getElementById("cidade").value.trim();
-      const material = document.getElementById("material").value.trim();
-      const responsavel = document.getElementById("responsavel").value.trim();
-      const quantidade = parseInt(document.getElementById("quantidade").value, 10);
+    function validarTransicaoStatus(atual, proximo) {
+      const fluxo = {
+        AGUARDANDO: ["EM TRANSPORTE"],
+        "EM TRANSPORTE": ["ENTREGUE"],
+        ENTREGUE: []
+      };
+      return fluxo[atual]?.includes(proximo);
+    }
 
-      if (!origem || !destino || !cidade || !material || !responsavel || !quantidade || quantidade < 1) {
-        alert("Preencha todos os campos corretamente.");
+    function limparCamposRemessa() {
+      document.getElementById("origem").value = "";
+      document.getElementById("destino").value = "";
+      document.getElementById("cidade").value = "";
+      document.getElementById("material").value = "";
+      document.getElementById("responsavel").value = "";
+      document.getElementById("quantidade").value = "";
+    }
+
+    window.fazerLogin = function () {
+      const usuario = document.getElementById("loginUsuario").value.trim();
+      const senha = document.getElementById("loginSenha").value.trim();
+
+      if (!usuarios[usuario] || usuarios[usuario].senha !== senha) {
+        document.getElementById("erroLogin").classList.remove("hidden");
         return;
       }
 
-      const remessaId = `REM-${Date.now()}`;
-      const criadoEm = Date.now();
+      usuarioAtual = { nome: usuario, perfil: usuarios[usuario].perfil };
+      document.getElementById("erroLogin").classList.add("hidden");
+      document.getElementById("loginCard").classList.add("hidden");
+      document.getElementById("appArea").classList.remove("hidden");
+      document.getElementById("usuarioLogadoTexto").textContent = usuarioAtual.nome;
+      document.getElementById("perfilLogadoTexto").textContent = usuarioAtual.perfil.toUpperCase();
 
-      for (let i = 1; i <= quantidade; i++) {
-        const codigo = `${remessaId}-VOL-${pad2(i)}`;
-        await addDoc(collection(db, "volumes"), {
-          remessaId,
-          codigo,
-          volumeNumero: i,
-          volumeEtiqueta: `${pad2(i)}/${pad2(quantidade)}`,
-          quantidadeVolumes: quantidade,
-          origem,
-          destino,
-          cidade,
-          material,
-          responsavel,
-          status: "AGUARDANDO",
-          criadoEm,
-          saidaEm: null,
-          chegadaEm: null,
-          tempoMin: null
-        });
+      mostrarSecao("painel");
+
+      if (usuarioAtual.perfil === "admin") {
+        carregarEtiquetasUltimaRemessa();
       }
 
-      localStorage.setItem("ultimaRemessaId", remessaId);
-      alert("Remessa criada com sucesso.");
-      carregarEtiquetasUltimaRemessa();
+      mostrarMensagem("Login realizado com sucesso.", "ok");
     };
 
-    window.carregarEtiquetasUltimaRemessa = async function () {
-      const remessaId = localStorage.getItem("ultimaRemessaId");
-      if (!remessaId) return;
+    window.logout = async function () {
+      await pararLeitorSaida();
+      await pararLeitorChegada();
 
+      usuarioAtual = null;
+      document.getElementById("appArea").classList.add("hidden");
+      document.getElementById("loginCard").classList.remove("hidden");
+      document.getElementById("loginUsuario").value = "";
+      document.getElementById("loginSenha").value = "";
+      mostrarMensagem("Sessão encerrada.", "info");
+    };
+
+    window.mostrarSecao = function (secao) {
+      document.getElementById("secaoAdmin").classList.add("hidden");
+      document.getElementById("secaoSaida").classList.add("hidden");
+      document.getElementById("secaoChegada").classList.add("hidden");
+      document.getElementById("secaoPainel").classList.add("hidden");
+      document.getElementById("secaoHistorico").classList.add("hidden");
+
+      if (secao === "painel") {
+        document.getElementById("secaoPainel").classList.remove("hidden");
+        return;
+      }
+
+      if (secao === "historico") {
+        document.getElementById("secaoHistorico").classList.remove("hidden");
+        renderizarHistorico();
+        return;
+      }
+
+      if (secao === "admin") {
+        if (usuarioAtual?.perfil !== "admin") {
+          mostrarMensagem("Acesso permitido apenas para administrador.", "warn");
+          return;
+        }
+        document.getElementById("secaoAdmin").classList.remove("hidden");
+        return;
+      }
+
+      if (secao === "saida") {
+        if (!(usuarioAtual?.perfil === "saida" || usuarioAtual?.perfil === "admin")) {
+          mostrarMensagem("Acesso não permitido para este perfil.", "warn");
+          return;
+        }
+        document.getElementById("secaoSaida").classList.remove("hidden");
+        return;
+      }
+
+      if (secao === "chegada") {
+        if (!(usuarioAtual?.perfil === "chegada" || usuarioAtual?.perfil === "admin")) {
+          mostrarMensagem("Acesso não permitido para este perfil.", "warn");
+          return;
+        }
+        document.getElementById("secaoChegada").classList.remove("hidden");
+      }
+    };
+
+    window.criarRemessa = async function () {
+      try {
+        const origem = document.getElementById("origem").value.trim();
+        const destino = document.getElementById("destino").value.trim();
+        const cidade = document.getElementById("cidade").value.trim();
+        const material = document.getElementById("material").value.trim();
+        const responsavel = document.getElementById("responsavel").value.trim();
+        const quantidade = parseInt(document.getElementById("quantidade").value, 10);
+
+        if (!origem || !destino || !cidade || !material || !responsavel || !quantidade || quantidade < 1) {
+          mostrarMensagem("Preencha todos os campos corretamente.", "warn");
+          return;
+        }
+
+        if (quantidade > 500) {
+          mostrarMensagem("Quantidade de volumes muito alta. Limite recomendado: 500.", "warn");
+          return;
+        }
+
+        const remessaId = `REM-${Date.now()}`;
+        const criadoEm = Date.now();
+
+        for (let i = 1; i <= quantidade; i++) {
+          const codigo = `${remessaId}-VOL-${pad2(i)}`;
+          await addDoc(collection(db, "volumes"), {
+            remessaId,
+            codigo,
+            volumeNumero: i,
+            volumeEtiqueta: `${pad2(i)}/${pad2(quantidade)}`,
+            quantidadeVolumes: quantidade,
+            origem,
+            destino,
+            cidade,
+            material,
+            responsavel,
+            status: "AGUARDANDO",
+            criadoEm,
+            saidaEm: null,
+            chegadaEm: null,
+            tempoMin: null
+          });
+        }
+
+        localStorage.setItem("ultimaRemessaId", remessaId);
+        limparCamposRemessa();
+        mostrarMensagem("Remessa criada com sucesso.", "ok");
+        await carregarEtiquetasUltimaRemessa();
+      } catch (error) {
+        console.error(error);
+        mostrarMensagem("Erro ao criar remessa.", "warn");
+      }
+    };
+
+    async function buscarVolumesPorRemessa(remessaId) {
       const q = query(
         collection(db, "volumes"),
         where("remessaId", "==", remessaId),
         orderBy("volumeNumero")
       );
-
       const snap = await getDocs(q);
-      if (snap.empty) return;
+      return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    }
 
-      const docs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-      const primeiro = docs[0];
+    window.carregarEtiquetasUltimaRemessa = async function () {
+      try {
+        const remessaId = localStorage.getItem("ultimaRemessaId");
+        if (!remessaId) {
+          mostrarMensagem("Nenhuma remessa recente encontrada.", "info");
+          return;
+        }
 
-      document.getElementById("notaInternaBox").classList.remove("hidden");
-      document.getElementById("etiquetasBox").classList.remove("hidden");
+        const docs = await buscarVolumesPorRemessa(remessaId);
+        if (!docs.length) {
+          mostrarMensagem("Nenhuma etiqueta encontrada para a última remessa.", "info");
+          return;
+        }
 
-      document.getElementById("notaInterna").innerHTML = `
-        <strong>Remessa:</strong> ${primeiro.remessaId}<br>
-        <strong>Origem:</strong> ${primeiro.origem}<br>
-        <strong>Destino:</strong> ${primeiro.destino}<br>
-        <strong>Cidade:</strong> ${primeiro.cidade}<br>
-        <strong>Material:</strong> ${primeiro.material}<br>
-        <strong>Volumes:</strong> ${primeiro.quantidadeVolumes}<br>
-        <strong>Responsável:</strong> ${primeiro.responsavel}<br>
-        <strong>Tipo:</strong> Transporte interno sem frete
-      `;
+        const primeiro = docs[0];
 
-      const area = document.getElementById("listaEtiquetas");
-      area.innerHTML = "";
+        document.getElementById("notaInternaBox").classList.remove("hidden");
+        document.getElementById("etiquetasBox").classList.remove("hidden");
 
-      docs.forEach((item, index) => {
-        const canvasId = `qr_${index}`;
-        const div = document.createElement("div");
-        div.className = "etiqueta";
-        div.innerHTML = `
-          <h3>Etiqueta ${item.volumeEtiqueta}</h3>
-          <div><strong>Remessa:</strong> ${item.remessaId}</div>
-          <div><strong>Volume:</strong> ${item.volumeEtiqueta}</div>
-          <div><strong>Código:</strong> ${item.codigo}</div>
-          <div><strong>Origem:</strong> ${item.origem}</div>
-          <div><strong>Destino:</strong> ${item.destino}</div>
-          <div><strong>Cidade:</strong> ${item.cidade}</div>
-          <div><strong>Material:</strong> ${item.material}</div>
-          <canvas id="${canvasId}"></canvas>
+        document.getElementById("notaInterna").innerHTML = `
+          <strong>Remessa:</strong> ${primeiro.remessaId}<br>
+          <strong>Origem:</strong> ${primeiro.origem}<br>
+          <strong>Destino:</strong> ${primeiro.destino}<br>
+          <strong>Cidade:</strong> ${primeiro.cidade}<br>
+          <strong>Material:</strong> ${primeiro.material}<br>
+          <strong>Volumes:</strong> ${primeiro.quantidadeVolumes}<br>
+          <strong>Responsável:</strong> ${primeiro.responsavel}<br>
+          <strong>Tipo:</strong> Transporte interno sem frete
         `;
-        area.appendChild(div);
-        QRCode.toCanvas(document.getElementById(canvasId), item.codigo, { width: 140 });
-      });
+
+        const area = document.getElementById("listaEtiquetas");
+        area.innerHTML = "";
+
+        docs.forEach((item, index) => {
+          const canvasId = `qr_${index}`;
+          const div = document.createElement("div");
+          div.className = "etiqueta";
+          div.innerHTML = `
+            <h3>Etiqueta ${item.volumeEtiqueta}</h3>
+            <div><strong>Remessa:</strong> ${item.remessaId}</div>
+            <div><strong>Volume:</strong> ${item.volumeEtiqueta}</div>
+            <div><strong>Código:</strong> ${item.codigo}</div>
+            <div><strong>Origem:</strong> ${item.origem}</div>
+            <div><strong>Destino:</strong> ${item.destino}</div>
+            <div><strong>Cidade:</strong> ${item.cidade}</div>
+            <div><strong>Material:</strong> ${item.material}</div>
+            <canvas id="${canvasId}"></canvas>
+          `;
+          area.appendChild(div);
+
+          const canvas = document.getElementById(canvasId);
+          QRCode.toCanvas(canvas, item.codigo, { width: 140 }, function (error) {
+            if (error) console.error(error);
+          });
+        });
+      } catch (error) {
+        console.error(error);
+        mostrarMensagem("Erro ao carregar etiquetas.", "warn");
+      }
     };
 
     async function buscarVolumePorCodigo(codigo) {
       const q = query(collection(db, "volumes"), where("codigo", "==", codigo));
       const snap = await getDocs(q);
+
       if (snap.empty) return null;
+      if (snap.docs.length > 1) {
+        throw new Error("Código duplicado encontrado no banco.");
+      }
+
       const docSnap = snap.docs[0];
       return { id: docSnap.id, ...docSnap.data() };
     }
 
     async function registrarSaida(codigo) {
-      if (!codigo) return alert("Informe o código.");
-      const item = await buscarVolumePorCodigo(codigo.trim());
-      if (!item) return alert("Código não encontrado.");
+      try {
+        const codigoTratado = (codigo || "").trim();
+        if (!codigoTratado) {
+          mostrarMensagem("Informe o código.", "warn");
+          return;
+        }
 
-      if (item.status === "ENTREGUE") {
-        return alert("Esse volume já foi entregue.");
+        const item = await buscarVolumePorCodigo(codigoTratado);
+        if (!item) {
+          mostrarMensagem("Código não encontrado.", "warn");
+          return;
+        }
+
+        if (!validarTransicaoStatus(item.status, "EM TRANSPORTE")) {
+          if (item.status === "ENTREGUE") {
+            mostrarMensagem("Esse volume já foi entregue.", "warn");
+            return;
+          }
+          if (item.status === "EM TRANSPORTE") {
+            mostrarMensagem("Esse volume já teve saída registrada.", "warn");
+            return;
+          }
+          mostrarMensagem("Transição de status inválida.", "warn");
+          return;
+        }
+
+        await updateDoc(doc(db, "volumes", item.id), {
+          status: "EM TRANSPORTE",
+          saidaEm: Date.now()
+        });
+
+        document.getElementById("codigoSaida").value = "";
+        mostrarMensagem("Saída registrada com sucesso.", "ok");
+      } catch (error) {
+        console.error(error);
+        mostrarMensagem(error.message || "Erro ao registrar saída.", "warn");
       }
-      if (item.status === "EM TRANSPORTE") {
-        return alert("Esse volume já teve saída.");
-      }
-
-      await updateDoc(doc(db, "volumes", item.id), {
-        status: "EM TRANSPORTE",
-        saidaEm: Date.now()
-      });
-
-      alert("Saída registrada com sucesso.");
     }
 
     async function registrarChegada(codigo) {
-      if (!codigo) return alert("Informe o código.");
-      const item = await buscarVolumePorCodigo(codigo.trim());
-      if (!item) return alert("Código não encontrado.");
+      try {
+        const codigoTratado = (codigo || "").trim();
+        if (!codigoTratado) {
+          mostrarMensagem("Informe o código.", "warn");
+          return;
+        }
 
-      if (item.status === "AGUARDANDO") {
-        return alert("Esse volume ainda não teve saída.");
+        const item = await buscarVolumePorCodigo(codigoTratado);
+        if (!item) {
+          mostrarMensagem("Código não encontrado.", "warn");
+          return;
+        }
+
+        if (!validarTransicaoStatus(item.status, "ENTREGUE")) {
+          if (item.status === "AGUARDANDO") {
+            mostrarMensagem("Esse volume ainda não teve saída.", "warn");
+            return;
+          }
+          if (item.status === "ENTREGUE") {
+            mostrarMensagem("Esse volume já teve chegada registrada.", "warn");
+            return;
+          }
+          mostrarMensagem("Transição de status inválida.", "warn");
+          return;
+        }
+
+        const agora = Date.now();
+        const saidaEm = item.saidaEm || agora;
+        const tempoMin = Math.round((agora - saidaEm) / 60000);
+
+        await updateDoc(doc(db, "volumes", item.id), {
+          status: "ENTREGUE",
+          chegadaEm: agora,
+          tempoMin
+        });
+
+        document.getElementById("codigoChegada").value = "";
+        mostrarMensagem("Chegada registrada com sucesso.", "ok");
+      } catch (error) {
+        console.error(error);
+        mostrarMensagem(error.message || "Erro ao registrar chegada.", "warn");
       }
-      if (item.status === "ENTREGUE") {
-        return alert("Esse volume já teve chegada.");
-      }
-
-      const agora = Date.now();
-      const saidaEm = item.saidaEm || agora;
-      const tempoMin = Math.round((agora - saidaEm) / 60000);
-
-      await updateDoc(doc(db, "volumes", item.id), {
-        status: "ENTREGUE",
-        chegadaEm: agora,
-        tempoMin
-      });
-
-      alert("Chegada registrada com sucesso.");
     }
 
     window.registrarSaidaManual = function () {
@@ -540,71 +984,197 @@
     };
 
     window.iniciarLeitorSaida = async function () {
-      if (html5QrSaida) {
-        try { await html5QrSaida.stop(); } catch {}
+      try {
+        await pararLeitorSaida();
+
+        html5QrSaida = new Html5Qrcode("readerSaida");
+
+        await html5QrSaida.start(
+          { facingMode: "environment" },
+          { fps: 12, qrbox: 240 },
+          async (decodedText) => {
+            const agora = Date.now();
+
+            if (decodedText === ultimoQrLidoSaida && (agora - ultimaLeituraSaida) < 3000) {
+              return;
+            }
+
+            ultimoQrLidoSaida = decodedText;
+            ultimaLeituraSaida = agora;
+
+            document.getElementById("codigoSaida").value = decodedText;
+            await pararLeitorSaida();
+            await registrarSaida(decodedText);
+          },
+          () => {}
+        );
+
+        mostrarMensagem("Leitor de saída iniciado.", "info");
+      } catch (error) {
+        console.error(error);
+        mostrarMensagem("Não foi possível iniciar a câmera para saída.", "warn");
       }
-      html5QrSaida = new Html5Qrcode("readerSaida");
-      await html5QrSaida.start(
-        { facingMode: "environment" },
-        { fps: 10, qrbox: 220 },
-        async (decodedText) => {
-          document.getElementById("codigoSaida").value = decodedText;
-          try { await html5QrSaida.stop(); } catch {}
-          registrarSaida(decodedText);
-        }
-      );
     };
 
     window.iniciarLeitorChegada = async function () {
-      if (html5QrChegada) {
-        try { await html5QrChegada.stop(); } catch {}
+      try {
+        await pararLeitorChegada();
+
+        html5QrChegada = new Html5Qrcode("readerChegada");
+
+        await html5QrChegada.start(
+          { facingMode: "environment" },
+          { fps: 12, qrbox: 240 },
+          async (decodedText) => {
+            const agora = Date.now();
+
+            if (decodedText === ultimoQrLidoChegada && (agora - ultimaLeituraChegada) < 3000) {
+              return;
+            }
+
+            ultimoQrLidoChegada = decodedText;
+            ultimaLeituraChegada = agora;
+
+            document.getElementById("codigoChegada").value = decodedText;
+            await pararLeitorChegada();
+            await registrarChegada(decodedText);
+          },
+          () => {}
+        );
+
+        mostrarMensagem("Leitor de chegada iniciado.", "info");
+      } catch (error) {
+        console.error(error);
+        mostrarMensagem("Não foi possível iniciar a câmera para chegada.", "warn");
       }
-      html5QrChegada = new Html5Qrcode("readerChegada");
-      await html5QrChegada.start(
-        { facingMode: "environment" },
-        { fps: 10, qrbox: 220 },
-        async (decodedText) => {
-          document.getElementById("codigoChegada").value = decodedText;
-          try { await html5QrChegada.stop(); } catch {}
-          registrarChegada(decodedText);
-        }
-      );
     };
 
-    onSnapshot(collection(db, "volumes"), (snap) => {
-      const lista = [];
-      snap.forEach((docSnap) => {
-        const d = docSnap.data();
-        if (!d.codigo || !d.status || !d.remessaId) return;
-        lista.push({ id: docSnap.id, ...d });
+    window.pararLeitorSaida = async function () {
+      try {
+        if (html5QrSaida) {
+          await html5QrSaida.stop();
+          await html5QrSaida.clear();
+          html5QrSaida = null;
+        }
+      } catch (error) {
+        console.warn("Erro ao parar leitor de saída:", error);
+      }
+    };
+
+    window.pararLeitorChegada = async function () {
+      try {
+        if (html5QrChegada) {
+          await html5QrChegada.stop();
+          await html5QrChegada.clear();
+          html5QrChegada = null;
+        }
+      } catch (error) {
+        console.warn("Erro ao parar leitor de chegada:", error);
+      }
+    };
+
+    function obterRemessasUnicas(lista) {
+      const mapa = new Map();
+
+      lista.forEach(item => {
+        if (!mapa.has(item.remessaId)) {
+          mapa.set(item.remessaId, {
+            remessaId: item.remessaId,
+            origem: item.origem,
+            destino: item.destino,
+            cidade: item.cidade,
+            material: item.material,
+            responsavel: item.responsavel,
+            quantidadeVolumes: item.quantidadeVolumes,
+            criadoEm: item.criadoEm
+          });
+        }
       });
 
-      lista.sort((a, b) => (b.criadoEm || 0) - (a.criadoEm || 0));
+      return [...mapa.values()].sort((a, b) => (b.criadoEm || 0) - (a.criadoEm || 0));
+    }
 
+    async function carregarFiltroRemessas() {
+      const select = document.getElementById("filtroRemessa");
+      const valorAtual = select.value;
+
+      const remessas = obterRemessasUnicas(todosVolumes);
+
+      select.innerHTML = `<option value="">Última remessa</option>`;
+
+      remessas.forEach(r => {
+        const option = document.createElement("option");
+        option.value = r.remessaId;
+        option.textContent = `${r.remessaId} - ${r.origem} → ${r.destino}`;
+        select.appendChild(option);
+      });
+
+      if ([...select.options].some(op => op.value === valorAtual)) {
+        select.value = valorAtual;
+      }
+    }
+
+    function getListaPainelFiltrada() {
+      let lista = [...todosVolumes];
+
+      if (!lista.length) return [];
+
+      const remessaSelecionada = document.getElementById("filtroRemessa").value;
+      const busca = document.getElementById("buscaCodigo").value.trim().toLowerCase();
+
+      if (remessaSelecionada) {
+        lista = lista.filter(v => v.remessaId === remessaSelecionada);
+      } else {
+        const ultimaRemessaId = [...lista].sort((a, b) => (b.criadoEm || 0) - (a.criadoEm || 0))[0]?.remessaId;
+        lista = lista.filter(v => v.remessaId === ultimaRemessaId);
+      }
+
+      if (busca) {
+        lista = lista.filter(v => (v.codigo || "").toLowerCase().includes(busca));
+      }
+
+      return lista.sort((a, b) => (a.volumeNumero || 0) - (b.volumeNumero || 0));
+    }
+
+    function atualizarPainel() {
       const tabela = document.getElementById("tabelaStatus");
       tabela.innerHTML = "";
 
-      if (!lista.length) {
-        tabela.innerHTML = `<tr><td colspan="7">Nenhum volume encontrado.</td></tr>`;
+      if (!todosVolumes.length) {
+        tabela.innerHTML = `<tr><td colspan="8">Nenhum volume encontrado.</td></tr>`;
         document.getElementById("resumoRemessa").textContent = "-";
         document.getElementById("resumoTotal").textContent = "0";
         document.getElementById("resumoSaida").textContent = "0";
         document.getElementById("resumoChegada").textContent = "0";
         document.getElementById("resumoPendentes").textContent = "0";
         document.getElementById("resumoTempo").textContent = "-";
+        document.getElementById("alertaPainel").className = "alerta info";
+        document.getElementById("alertaPainel").textContent = "Nenhuma remessa cadastrada até o momento.";
         return;
       }
 
-      const ultimaRemessaId = lista[0].remessaId;
-      const remessaAtual = lista.filter(v => v.remessaId === ultimaRemessaId);
+      const remessaAtual = getListaPainelFiltrada();
 
-      document.getElementById("resumoRemessa").textContent = ultimaRemessaId;
+      if (!remessaAtual.length) {
+        tabela.innerHTML = `<tr><td colspan="8">Nenhum volume encontrado para o filtro informado.</td></tr>`;
+        document.getElementById("resumoRemessa").textContent = "-";
+        document.getElementById("resumoTotal").textContent = "0";
+        document.getElementById("resumoSaida").textContent = "0";
+        document.getElementById("resumoChegada").textContent = "0";
+        document.getElementById("resumoPendentes").textContent = "0";
+        document.getElementById("resumoTempo").textContent = "-";
+        document.getElementById("alertaPainel").className = "alerta info";
+        document.getElementById("alertaPainel").textContent = "Nenhum item corresponde ao filtro atual.";
+        return;
+      }
 
+      const remessaId = remessaAtual[0].remessaId;
       const total = remessaAtual.length;
       const comSaida = remessaAtual.filter(v => v.status === "EM TRANSPORTE" || v.status === "ENTREGUE").length;
       const comChegada = remessaAtual.filter(v => v.status === "ENTREGUE").length;
       const pendentes = total - comChegada;
 
+      document.getElementById("resumoRemessa").textContent = remessaId;
       document.getElementById("resumoTotal").textContent = total;
       document.getElementById("resumoSaida").textContent = comSaida;
       document.getElementById("resumoChegada").textContent = comChegada;
@@ -621,30 +1191,207 @@
       const alerta = document.getElementById("alertaPainel");
       if (comSaida > comChegada) {
         alerta.className = "alerta warn";
-        alerta.textContent = `Atenção: ${comSaida} volume(s) tiveram saída, mas apenas ${comChegada} chegaram. Há divergência a regularizar.`;
+        alerta.textContent = `Atenção: ${comSaida} volume(s) tiveram saída, mas apenas ${comChegada} tiveram chegada. Há divergência a regularizar.`;
       } else if (total > 0 && comChegada === total) {
         alerta.className = "alerta ok";
-        alerta.textContent = "Todos os volumes foram recebidos com sucesso.";
+        alerta.textContent = "Todos os volumes desta remessa foram recebidos com sucesso.";
       } else {
-        alerta.className = "alerta ok";
-        alerta.textContent = "Nenhuma divergência encontrada.";
+        alerta.className = "alerta info";
+        alerta.textContent = "Nenhuma divergência encontrada no momento.";
       }
 
-      remessaAtual
-        .sort((a, b) => (a.volumeNumero || 0) - (b.volumeNumero || 0))
-        .forEach((item) => {
-          const tr = document.createElement("tr");
-          tr.innerHTML = `
-            <td>${item.codigo}<br><span class="mini">${item.volumeEtiqueta || "-"}</span></td>
-            <td><span class="${classeStatus(item.status)}">${item.status}</span></td>
-            <td>${item.origem || "-"}</td>
-            <td>${item.destino || "-"}</td>
-            <td>${formatarData(item.saidaEm)}</td>
-            <td>${formatarData(item.chegadaEm)}</td>
-            <td>${formatarTempo(item.tempoMin)}</td>
-          `;
-          tabela.appendChild(tr);
+      remessaAtual.forEach((item) => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${item.codigo}<br><span class="mini">${item.volumeEtiqueta || "-"}</span></td>
+          <td><span class="${classeStatus(item.status)}">${item.status}</span></td>
+          <td>${item.origem || "-"}</td>
+          <td>${item.destino || "-"}</td>
+          <td>${item.material || "-"}</td>
+          <td>${formatarData(item.saidaEm)}</td>
+          <td>${formatarData(item.chegadaEm)}</td>
+          <td>${formatarTempo(item.tempoMin)}</td>
+        `;
+        tabela.appendChild(tr);
+      });
+    }
+
+    function renderizarHistorico() {
+      const area = document.getElementById("listaHistorico");
+      area.innerHTML = "";
+
+      const remessas = obterRemessasUnicas(todosVolumes);
+
+      if (!remessas.length) {
+        area.innerHTML = `<div class="sem-dados">Nenhuma remessa cadastrada ainda.</div>`;
+        return;
+      }
+
+      remessas.forEach(remessa => {
+        const volumes = todosVolumes.filter(v => v.remessaId === remessa.remessaId);
+        const total = volumes.length;
+        const entregues = volumes.filter(v => v.status === "ENTREGUE").length;
+        const emTransporte = volumes.filter(v => v.status === "EM TRANSPORTE").length;
+        const aguardando = volumes.filter(v => v.status === "AGUARDANDO").length;
+
+        const div = document.createElement("div");
+        div.className = "historico-item";
+        div.innerHTML = `
+          <strong>${remessa.remessaId}</strong>
+          <div><b>Origem:</b> ${remessa.origem || "-"}</div>
+          <div><b>Destino:</b> ${remessa.destino || "-"}</div>
+          <div><b>Cidade:</b> ${remessa.cidade || "-"}</div>
+          <div><b>Material:</b> ${remessa.material || "-"}</div>
+          <div><b>Responsável:</b> ${remessa.responsavel || "-"}</div>
+          <div><b>Data:</b> ${formatarData(remessa.criadoEm)}</div>
+          <div style="margin-top:8px;">
+            <span class="pill">Total: ${total}</span>
+            <span class="pill">Entregues: ${entregues}</span>
+            <span class="pill">Em transporte: ${emTransporte}</span>
+            <span class="pill">Aguardando: ${aguardando}</span>
+          </div>
+          <div style="margin-top:10px;">
+            <button class="btn3" onclick="selecionarRemessaHistorico('${remessa.remessaId}')">Ver no painel</button>
+          </div>
+        `;
+        area.appendChild(div);
+      });
+    }
+
+    window.selecionarRemessaHistorico = function(remessaId) {
+      document.getElementById("filtroRemessa").value = remessaId;
+      mostrarSecao("painel");
+      atualizarPainel();
+    };
+
+    window.limparFiltrosPainel = function () {
+      document.getElementById("filtroRemessa").value = "";
+      document.getElementById("buscaCodigo").value = "";
+      atualizarPainel();
+    };
+
+    window.exportarEtiquetasPDF = async function () {
+      try {
+        const remessaId = localStorage.getItem("ultimaRemessaId");
+        if (!remessaId) {
+          mostrarMensagem("Nenhuma remessa recente para exportar.", "warn");
+          return;
+        }
+
+        const volumes = await buscarVolumesPorRemessa(remessaId);
+        if (!volumes.length) {
+          mostrarMensagem("Nenhuma etiqueta encontrada para exportação.", "warn");
+          return;
+        }
+
+        const { jsPDF } = window.jspdf;
+        const pdf = new jsPDF("p", "mm", "a4");
+
+        for (let i = 0; i < volumes.length; i++) {
+          const item = volumes[i];
+
+          if (i > 0) pdf.addPage();
+
+          const tempCanvas = document.createElement("canvas");
+          await QRCode.toCanvas(tempCanvas, item.codigo, { width: 220 });
+
+          const qrImage = tempCanvas.toDataURL("image/png");
+
+          pdf.setFontSize(16);
+          pdf.text("Etiqueta de Volume", 15, 20);
+
+          pdf.setFontSize(11);
+          pdf.text(`Remessa: ${item.remessaId}`, 15, 32);
+          pdf.text(`Volume: ${item.volumeEtiqueta}`, 15, 40);
+          pdf.text(`Código: ${item.codigo}`, 15, 48);
+          pdf.text(`Origem: ${item.origem}`, 15, 56);
+          pdf.text(`Destino: ${item.destino}`, 15, 64);
+          pdf.text(`Cidade: ${item.cidade}`, 15, 72);
+          pdf.text(`Material: ${item.material}`, 15, 80);
+
+          pdf.addImage(qrImage, "PNG", 15, 90, 55, 55);
+        }
+
+        pdf.save(`etiquetas-${remessaId}.pdf`);
+        mostrarMensagem("PDF de etiquetas gerado com sucesso.", "ok");
+      } catch (error) {
+        console.error(error);
+        mostrarMensagem("Erro ao exportar etiquetas em PDF.", "warn");
+      }
+    };
+
+    window.exportarRelatorioPDF = async function () {
+      try {
+        const lista = getListaPainelFiltrada();
+
+        if (!lista.length) {
+          mostrarMensagem("Nenhum dado disponível para exportação.", "warn");
+          return;
+        }
+
+        const { jsPDF } = window.jspdf;
+        const pdf = new jsPDF("p", "mm", "a4");
+
+        let y = 15;
+        const remessaId = lista[0].remessaId;
+
+        pdf.setFontSize(16);
+        pdf.text("Relatório de Remessa", 14, y);
+        y += 10;
+
+        pdf.setFontSize(11);
+        pdf.text(`Remessa: ${remessaId}`, 14, y); y += 7;
+        pdf.text(`Gerado em: ${new Date().toLocaleString("pt-BR")}`, 14, y); y += 10;
+
+        lista.forEach((item, index) => {
+          if (y > 270) {
+            pdf.addPage();
+            y = 15;
+          }
+
+          pdf.setFontSize(11);
+          pdf.text(`${index + 1}. ${item.codigo}`, 14, y); y += 6;
+          pdf.setFontSize(10);
+          pdf.text(`Status: ${item.status}`, 18, y); y += 5;
+          pdf.text(`Origem: ${item.origem}`, 18, y); y += 5;
+          pdf.text(`Destino: ${item.destino}`, 18, y); y += 5;
+          pdf.text(`Material: ${item.material || "-"}`, 18, y); y += 5;
+          pdf.text(`Saída: ${formatarData(item.saidaEm)}`, 18, y); y += 5;
+          pdf.text(`Chegada: ${formatarData(item.chegadaEm)}`, 18, y); y += 5;
+          pdf.text(`Tempo: ${formatarTempo(item.tempoMin)}`, 18, y); y += 8;
+
+          pdf.line(14, y, 195, y);
+          y += 6;
         });
+
+        pdf.save(`relatorio-${remessaId}.pdf`);
+        mostrarMensagem("Relatório PDF gerado com sucesso.", "ok");
+      } catch (error) {
+        console.error(error);
+        mostrarMensagem("Erro ao exportar relatório PDF.", "warn");
+      }
+    };
+
+    document.getElementById("filtroRemessa").addEventListener("change", atualizarPainel);
+    document.getElementById("buscaCodigo").addEventListener("input", atualizarPainel);
+
+    onSnapshot(collection(db, "volumes"), (snap) => {
+      const lista = [];
+
+      snap.forEach((docSnap) => {
+        const d = docSnap.data();
+        if (!d.codigo || !d.status || !d.remessaId) return;
+        lista.push({ id: docSnap.id, ...d });
+      });
+
+      todosVolumes = lista.sort((a, b) => (b.criadoEm || 0) - (a.criadoEm || 0));
+
+      carregarFiltroRemessas();
+      atualizarPainel();
+      renderizarHistorico();
+    }, (error) => {
+      console.error(error);
+      mostrarMensagem("Erro ao sincronizar dados em tempo real.", "warn");
     });
   </script>
 </body>
