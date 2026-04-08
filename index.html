@@ -3,20 +3,19 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Rastreamento de Resíduos Hospitalares</title>
-
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js"></script>
+<title>Rastreamento Hospitalar</title>
 
 <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
+<script src="https://unpkg.com/html5-qrcode"></script>
 
 <style>
-body { font-family: Arial; background:#f4f7fb; margin:0 }
-.container { padding:20px }
-.card { background:#fff; padding:15px; border-radius:10px; margin-bottom:15px }
-button { padding:10px; border:none; border-radius:8px; cursor:pointer }
-.btn { background:#0f766e; color:white }
-input { padding:10px; width:100%; margin:5px 0 }
+body{font-family:Arial;background:#f4f7fb;margin:0}
+.container{padding:20px}
+.card{background:#fff;padding:15px;border-radius:12px;margin-bottom:15px}
+button{padding:10px;border:none;border-radius:8px;cursor:pointer}
+.btn{background:#0f766e;color:#fff}
+input,select{padding:10px;width:100%;margin:5px 0}
+.hidden{display:none}
 </style>
 </head>
 
@@ -24,29 +23,62 @@ input { padding:10px; width:100%; margin:5px 0 }
 
 <div class="container">
 
+<!-- LOGIN -->
+<div class="card" id="loginBox">
+<h2>Login</h2>
+<select id="usuario">
+<option value="admin">Admin</option>
+<option value="saida">Saída</option>
+<option value="chegada">Chegada</option>
+</select>
+<input id="senha" placeholder="Senha">
+<button class="btn" onclick="login()">Entrar</button>
+</div>
+
+<!-- ADMIN -->
+<div id="adminArea" class="hidden">
+
 <div class="card">
 <h2>Criar Remessa</h2>
-
 <input id="origem" placeholder="Origem">
 <input id="destino" placeholder="Destino">
+<input id="cidade" placeholder="Cidade">
 <input id="material" placeholder="Material">
+<input id="responsavel" placeholder="Responsável">
 <input id="volumes" type="number" placeholder="Quantidade">
-
 <button class="btn" onclick="criarRemessa()">Criar</button>
 </div>
 
 <div class="card">
-<h2>Saída</h2>
-<input id="codigoSaida" placeholder="Código">
-<button class="btn" onclick="registrarSaida()">Registrar Saída</button>
+<h2>Etiquetas</h2>
+<div id="etiquetas"></div>
 </div>
 
+</div>
+
+<!-- SAIDA -->
+<div id="saidaArea" class="hidden">
 <div class="card">
-<h2>Chegada</h2>
-<input id="codigoChegada" placeholder="Código">
-<button class="btn" onclick="registrarChegada()">Registrar Chegada</button>
+<h2>Registrar Saída</h2>
+<input id="codigoSaida" placeholder="Código manual">
+<button class="btn" onclick="saidaManual()">Manual</button>
+<div id="readerSaida"></div>
+<button onclick="lerSaida()">Ler QR</button>
+</div>
 </div>
 
+<!-- CHEGADA -->
+<div id="chegadaArea" class="hidden">
+<div class="card">
+<h2>Registrar Chegada</h2>
+<input id="codigoChegada" placeholder="Código manual">
+<button class="btn" onclick="chegadaManual()">Manual</button>
+<div id="readerChegada"></div>
+<button onclick="lerChegada()">Ler QR</button>
+</div>
+</div>
+
+<!-- STATUS -->
 <div class="card">
 <h2>Status</h2>
 <div id="status"></div>
@@ -56,7 +88,6 @@ input { padding:10px; width:100%; margin:5px 0 }
 
 <script type="module">
 
-// 🔥 FIREBASE CONFIG
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getFirestore, collection, addDoc, getDocs, updateDoc, doc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
@@ -72,38 +103,56 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-// 🔥 CRIAR REMESSA
-window.criarRemessa = async function() {
+// LOGIN SIMPLES
+window.login = function(){
+let user = document.getElementById("usuario").value;
 
-let origem = document.getElementById("origem").value;
-let destino = document.getElementById("destino").value;
-let material = document.getElementById("material").value;
-let qtd = parseInt(document.getElementById("volumes").value);
+document.getElementById("loginBox").classList.add("hidden");
 
-let remessa = "REM-" + Date.now();
+if(user==="admin") document.getElementById("adminArea").classList.remove("hidden");
+if(user==="saida") document.getElementById("saidaArea").classList.remove("hidden");
+if(user==="chegada") document.getElementById("chegadaArea").classList.remove("hidden");
+}
+
+// CRIAR REMESSA
+window.criarRemessa = async function(){
+
+let origem = origemInput.value;
+let destino = destinoInput.value;
+let cidade = cidadeInput.value;
+let material = materialInput.value;
+let responsavel = responsavelInput.value;
+let qtd = parseInt(volumesInput.value);
+
+let remessa = "REM-"+Date.now();
+
+let etiquetas = document.getElementById("etiquetas");
+etiquetas.innerHTML="";
 
 for(let i=1;i<=qtd;i++){
 
-let codigo = remessa + "-VOL-" + String(i).padStart(2,"0");
+let codigo = remessa+"-VOL-"+String(i).padStart(2,"0");
 
-await addDoc(collection(db, "volumes"), {
-codigo,
-origem,
-destino,
-material,
+await addDoc(collection(db,"volumes"),{
+codigo,origem,destino,cidade,material,responsavel,
 status:"AGUARDANDO",
-dataCriacao:new Date().toLocaleString()
+saida:null,
+chegada:null
 });
 
+let div = document.createElement("div");
+div.innerHTML = `<b>${codigo}</b><br><canvas id="${codigo}"></canvas>`;
+etiquetas.appendChild(div);
+
+QRCode.toCanvas(document.getElementById(codigo), codigo);
+
 }
 
-alert("Remessa criada com sucesso!");
+alert("Remessa criada!");
 }
 
-// 🔵 SAÍDA
-window.registrarSaida = async function(){
-
-let codigo = document.getElementById("codigoSaida").value;
+// SAIDA
+async function registrarSaida(codigo){
 
 let query = await getDocs(collection(db,"volumes"));
 
@@ -112,37 +161,55 @@ if(item.data().codigo === codigo){
 
 await updateDoc(doc(db,"volumes",item.id),{
 status:"EM TRANSPORTE",
-saida:new Date().toLocaleString()
-});
-
-alert("Saída registrada!");
-}
+saida:Date.now()
 });
 
 }
+});
+}
 
-// 🟣 CHEGADA
-window.registrarChegada = async function(){
+window.saidaManual = ()=> registrarSaida(codigoSaida.value);
 
-let codigo = document.getElementById("codigoChegada").value;
+// CHEGADA
+async function registrarChegada(codigo){
 
 let query = await getDocs(collection(db,"volumes"));
 
 query.forEach(async (item)=>{
 if(item.data().codigo === codigo){
 
+let tempo = Date.now() - item.data().saida;
+
 await updateDoc(doc(db,"volumes",item.id),{
 status:"ENTREGUE",
-chegada:new Date().toLocaleString()
-});
-
-alert("Chegada registrada!");
-}
+chegada:Date.now(),
+tempo
 });
 
 }
+});
+}
 
-// 🔥 ATUALIZA STATUS EM TEMPO REAL
+window.chegadaManual = ()=> registrarChegada(codigoChegada.value);
+
+// QR SCAN
+window.lerSaida = ()=>{
+new Html5Qrcode("readerSaida").start(
+{ facingMode: "environment" },
+{},
+(codigo)=> registrarSaida(codigo)
+);
+}
+
+window.lerChegada = ()=>{
+new Html5Qrcode("readerChegada").start(
+{ facingMode: "environment" },
+{},
+(codigo)=> registrarChegada(codigo)
+);
+}
+
+// STATUS
 async function carregar(){
 
 let lista = document.getElementById("status");
@@ -155,7 +222,8 @@ let d = item.data();
 
 lista.innerHTML += `
 <p>
-${d.codigo} - ${d.status}
+${d.codigo} - ${d.status} 
+${d.tempo ? "- Tempo: "+Math.round(d.tempo/1000)+"s":""}
 </p>
 `;
 });
