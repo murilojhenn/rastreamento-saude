@@ -1,775 +1,170 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Rastreamento Interno de Resíduos Hospitalares</title>
-  <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
-  <style>
-    * { box-sizing: border-box; }
-    body {
-      margin: 0;
-      font-family: Arial, Helvetica, sans-serif;
-      background: #f3f6fb;
-      color: #1e293b;
-    }
-    .topo {
-      background: linear-gradient(135deg, #0f766e, #0ea5a4);
-      color: white;
-      padding: 20px;
-      text-align: center;
-      box-shadow: 0 2px 10px rgba(0,0,0,.12);
-    }
-    .topo h1 { margin: 0; font-size: 28px; }
-    .topo p { margin: 8px 0 0; opacity: .95; }
-    .container {
-      max-width: 1150px;
-      margin: 20px auto;
-      padding: 16px;
-    }
-    .card {
-      background: white;
-      border-radius: 18px;
-      padding: 18px;
-      box-shadow: 0 4px 16px rgba(0,0,0,.08);
-      margin-bottom: 18px;
-    }
-    h2, h3 { margin-top: 0; color: #0f766e; }
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 12px;
-    }
-    input, select {
-      width: 100%;
-      padding: 12px;
-      border-radius: 12px;
-      border: 1px solid #cbd5e1;
-      font-size: 15px;
-      outline: none;
-      background: white;
-    }
-    input:focus, select:focus {
-      border-color: #0ea5a4;
-      box-shadow: 0 0 0 3px rgba(14,165,164,.15);
-    }
-    button {
-      border: none;
-      border-radius: 12px;
-      padding: 12px 16px;
-      font-weight: bold;
-      cursor: pointer;
-      font-size: 14px;
-    }
-    .btn {
-      background: #0f766e;
-      color: white;
-    }
-    .btn2 {
-      background: #2563eb;
-      color: white;
-    }
-    .btn3 {
-      background: #e2e8f0;
-      color: #111827;
-    }
-    .btn-danger {
-      background: #dc2626;
-      color: white;
-    }
-    .row {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-    }
-    .hidden { display: none !important; }
-    .badge {
-      display: inline-block;
-      padding: 6px 10px;
-      border-radius: 999px;
-      font-size: 12px;
-      font-weight: bold;
-    }
-    .b-pendente { background: #fef3c7; color: #92400e; }
-    .b-saida { background: #dbeafe; color: #1d4ed8; }
-    .b-chegada { background: #dcfce7; color: #166534; }
-    .b-erro { background: #fee2e2; color: #991b1b; }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rastreamento de Resíduos Hospitalares</title>
 
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 12px;
-      font-size: 14px;
-      background: white;
-      overflow: hidden;
-      border-radius: 12px;
-    }
-    th, td {
-      border-bottom: 1px solid #e5e7eb;
-      padding: 10px;
-      text-align: left;
-      vertical-align: top;
-    }
-    th {
-      background: #f8fafc;
-      color: #0f172a;
-    }
-    .mini {
-      font-size: 12px;
-      color: #64748b;
-    }
-    .etiquetas {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 14px;
-      margin-top: 14px;
-    }
-    .etiqueta {
-      border: 2px dashed #0ea5a4;
-      border-radius: 14px;
-      padding: 12px;
-      background: #f8fffe;
-    }
-    .etiqueta h4 {
-      margin: 0 0 8px;
-      color: #0f766e;
-    }
-    .qrcanvas {
-      margin-top: 10px;
-      max-width: 100%;
-      background: white;
-      padding: 6px;
-      border-radius: 8px;
-    }
-    .alerta {
-      border-radius: 12px;
-      padding: 14px;
-      margin-top: 12px;
-      font-weight: bold;
-    }
-    .ok { background: #dcfce7; color: #166534; }
-    .warn { background: #fee2e2; color: #991b1b; }
-    .login-wrap {
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 16px;
-    }
-    .login-card {
-      width: 100%;
-      max-width: 420px;
-      background: white;
-      border-radius: 20px;
-      padding: 24px;
-      box-shadow: 0 8px 24px rgba(0,0,0,.12);
-    }
-    .login-card h2 {
-      text-align: center;
-      margin-bottom: 8px;
-    }
-    .login-card p {
-      text-align: center;
-      color: #64748b;
-      margin-top: 0;
-      margin-bottom: 18px;
-    }
-    .status-boxes {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-      gap: 12px;
-    }
-    .status-box {
-      background: #f8fafc;
-      border-left: 5px solid #0ea5a4;
-      border-radius: 12px;
-      padding: 12px;
-    }
-    .status-box strong {
-      display: block;
-      margin-bottom: 6px;
-      color: #0f172a;
-    }
-    .small-note {
-      font-size: 12px;
-      color: #64748b;
-      margin-top: 10px;
-    }
-    @media (max-width: 700px) {
-      .topo h1 { font-size: 23px; }
-      .row { flex-direction: column; }
-      button { width: 100%; }
-    }
-  </style>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
+
+<style>
+body { font-family: Arial; background:#f4f7fb; margin:0 }
+.container { padding:20px }
+.card { background:#fff; padding:15px; border-radius:10px; margin-bottom:15px }
+button { padding:10px; border:none; border-radius:8px; cursor:pointer }
+.btn { background:#0f766e; color:white }
+input { padding:10px; width:100%; margin:5px 0 }
+</style>
 </head>
+
 <body>
-  <div id="loginScreen" class="login-wrap">
-    <div class="login-card">
-      <h2>Login do Sistema</h2>
-      <p>Rastreamento interno de resíduos hospitalares</p>
-
-      <div style="margin-bottom:10px;">
-        <label>Usuário</label>
-        <input type="text" id="loginUsuario" placeholder="Digite o usuário" />
-      </div>
-
-      <div style="margin-bottom:10px;">
-        <label>Senha</label>
-        <input type="password" id="loginSenha" placeholder="Digite a senha" />
-      </div>
-
-      <button class="btn" onclick="fazerLogin()">Entrar</button>
-
-      <div id="loginErro" class="alerta warn hidden" style="margin-top:12px;">
-        Usuário ou senha inválidos.
-      </div>
-
-      <div class="small-note">
-        Usuários de teste:<br>
-        admin / 1234<br>
-        saida / 1234<br>
-        chegada / 1234
-      </div>
-    </div>
-  </div>
-
-  <div id="appScreen" class="hidden">
-    <div class="topo">
-      <h1>Sistema de Rastreamento Interno</h1>
-      <p>Controle de remessas, saída, chegada, conferência e tempo em percurso</p>
-    </div>
-
-    <div class="container">
-      <div class="card">
-        <div class="row" style="justify-content:space-between; align-items:center;">
-          <div>
-            <strong>Usuário logado:</strong> <span id="usuarioAtual"></span>
-            <span id="perfilAtual" class="badge b-saida" style="margin-left:8px;"></span>
-          </div>
-          <div class="row">
-            <button class="btn3" onclick="mostrarTela('painel')">Painel</button>
-            <button class="btn3" onclick="mostrarTela('admin')">Admin</button>
-            <button class="btn3" onclick="mostrarTela('saida')">Saída</button>
-            <button class="btn3" onclick="mostrarTela('chegada')">Chegada</button>
-            <button class="btn-danger" onclick="logout()">Sair</button>
-          </div>
-        </div>
-      </div>
-
-      <div id="painelTela" class="card">
-        <h2>Painel de Acompanhamento</h2>
-        <div class="status-boxes">
-          <div class="status-box"><strong>Remessa</strong><span id="p-remessa">-</span></div>
-          <div class="status-box"><strong>Origem</strong><span id="p-origem">-</span></div>
-          <div class="status-box"><strong>Destino</strong><span id="p-destino">-</span></div>
-          <div class="status-box"><strong>Volumes totais</strong><span id="p-total">0</span></div>
-          <div class="status-box"><strong>Volumes com saída</strong><span id="p-saida">0</span></div>
-          <div class="status-box"><strong>Volumes com chegada</strong><span id="p-chegada">0</span></div>
-          <div class="status-box"><strong>Pendentes</strong><span id="p-pendentes">0</span></div>
-          <div class="status-box"><strong>Tempo médio em percurso</strong><span id="p-tempo">-</span></div>
-        </div>
-
-        <div id="painelAlerta" class="alerta ok" style="margin-top:14px;">
-          Nenhuma divergência encontrada.
-        </div>
-
-        <table>
-          <thead>
-            <tr>
-              <th>Volume</th>
-              <th>Status</th>
-              <th>Saída</th>
-              <th>Chegada</th>
-              <th>Tempo em percurso</th>
-            </tr>
-          </thead>
-          <tbody id="painelTabela"></tbody>
-        </table>
-      </div>
-
-      <div id="adminTela" class="card hidden">
-        <h2>Tela Admin - Cadastro de Remessa</h2>
-
-        <div class="grid">
-          <div>
-            <label>Origem</label>
-            <input type="text" id="origem" placeholder="Ex: Hospital Feminino" />
-          </div>
-          <div>
-            <label>Destino</label>
-            <input type="text" id="destino" placeholder="Ex: Central de Tratamento" />
-          </div>
-          <div>
-            <label>Cidade</label>
-            <input type="text" id="cidade" placeholder="Ex: Ariquemes - RO" value="Ariquemes - RO" />
-          </div>
-          <div>
-            <label>Material</label>
-            <input type="text" id="material" placeholder="Ex: Seringas" />
-          </div>
-          <div>
-            <label>Quantidade de volumes</label>
-            <input type="number" id="quantidade" min="1" placeholder="Ex: 6" />
-          </div>
-          <div>
-            <label>Responsável</label>
-            <input type="text" id="responsavel" placeholder="Ex: Setor de coleta interna" />
-          </div>
-        </div>
-
-        <div class="row" style="margin-top:14px;">
-          <button class="btn" onclick="criarRemessa()">Criar remessa</button>
-          <button class="btn2" onclick="resetarSistema()">Resetar sistema</button>
-        </div>
-
-        <div id="resumoRemessa" class="hidden">
-          <div class="alerta ok" style="margin-top:14px;">
-            Remessa criada com sucesso.
-          </div>
-
-          <div class="card" style="margin-top:14px; background:#f8fafc;">
-            <h3>Nota interna</h3>
-            <div id="notaInterna"></div>
-          </div>
-
-          <h3>Etiquetas dos volumes</h3>
-          <div id="listaEtiquetas" class="etiquetas"></div>
-        </div>
-      </div>
-
-      <div id="saidaTela" class="card hidden">
-        <h2>Tela de Saída</h2>
-        <p class="mini">Marque a saída de cada volume da remessa.</p>
-
-        <div class="row">
-          <input type="text" id="codigoSaida" placeholder="Digite o código do volume Ex: REM-001-VOL-01" />
-          <button class="btn" onclick="registrarSaidaPorCodigo()">Dar saída</button>
-        </div>
-
-        <table>
-          <thead>
-            <tr>
-              <th>Volume</th>
-              <th>Status</th>
-              <th>Ação</th>
-            </tr>
-          </thead>
-          <tbody id="saidaTabela"></tbody>
-        </table>
-      </div>
-
-      <div id="chegadaTela" class="card hidden">
-        <h2>Tela de Chegada</h2>
-        <p class="mini">Marque a chegada de cada volume no destino.</p>
-
-        <div class="row">
-          <input type="text" id="codigoChegada" placeholder="Digite o código do volume Ex: REM-001-VOL-01" />
-          <button class="btn2" onclick="registrarChegadaPorCodigo()">Dar chegada</button>
-        </div>
-
-        <table>
-          <thead>
-            <tr>
-              <th>Volume</th>
-              <th>Status</th>
-              <th>Saída</th>
-              <th>Ação</th>
-            </tr>
-          </thead>
-          <tbody id="chegadaTabela"></tbody>
-        </table>
-      </div>
-    </div>
-  </div>
-
-  <script>
-    const usuarios = {
-      admin: { senha: "1234", perfil: "admin" },
-      saida: { senha: "1234", perfil: "saida" },
-      chegada: { senha: "1234", perfil: "chegada" }
-    };
-
-    let usuarioLogado = null;
-    let remessa = JSON.parse(localStorage.getItem("remessaDemo")) || null;
-
-    function salvar() {
-      localStorage.setItem("remessaDemo", JSON.stringify(remessa));
-    }
-
-    function fazerLogin() {
-      const usuario = document.getElementById("loginUsuario").value.trim();
-      const senha = document.getElementById("loginSenha").value.trim();
-      const erro = document.getElementById("loginErro");
-
-      if (usuarios[usuario] && usuarios[usuario].senha === senha) {
-        usuarioLogado = { nome: usuario, perfil: usuarios[usuario].perfil };
-        erro.classList.add("hidden");
-        document.getElementById("loginScreen").classList.add("hidden");
-        document.getElementById("appScreen").classList.remove("hidden");
-        document.getElementById("usuarioAtual").textContent = usuarioLogado.nome;
-        document.getElementById("perfilAtual").textContent = usuarioLogado.perfil.toUpperCase();
-        aplicarPermissoes();
-        atualizarTudo();
-      } else {
-        erro.classList.remove("hidden");
-      }
-    }
-
-    function logout() {
-      usuarioLogado = null;
-      document.getElementById("appScreen").classList.add("hidden");
-      document.getElementById("loginScreen").classList.remove("hidden");
-      document.getElementById("loginUsuario").value = "";
-      document.getElementById("loginSenha").value = "";
-    }
-
-    function aplicarPermissoes() {
-      const adminTela = document.getElementById("adminTela");
-      const saidaTela = document.getElementById("saidaTela");
-      const chegadaTela = document.getElementById("chegadaTela");
-
-      adminTela.classList.add("hidden");
-      saidaTela.classList.add("hidden");
-      chegadaTela.classList.add("hidden");
-      document.getElementById("painelTela").classList.remove("hidden");
-
-      if (usuarioLogado.perfil === "admin") {
-        adminTela.classList.remove("hidden");
-      }
-      if (usuarioLogado.perfil === "saida" || usuarioLogado.perfil === "admin") {
-        saidaTela.classList.remove("hidden");
-      }
-      if (usuarioLogado.perfil === "chegada" || usuarioLogado.perfil === "admin") {
-        chegadaTela.classList.remove("hidden");
-      }
-    }
-
-    function mostrarTela(nome) {
-      const telas = ["painelTela", "adminTela", "saidaTela", "chegadaTela"];
-      telas.forEach(id => document.getElementById(id).classList.add("hidden"));
-
-      document.getElementById(nome + "Tela").classList.remove("hidden");
-
-      if (nome === "admin" && usuarioLogado.perfil !== "admin") {
-        document.getElementById("adminTela").classList.add("hidden");
-        document.getElementById("painelTela").classList.remove("hidden");
-      }
-
-      if (nome === "saida" && !(usuarioLogado.perfil === "saida" || usuarioLogado.perfil === "admin")) {
-        document.getElementById("saidaTela").classList.add("hidden");
-        document.getElementById("painelTela").classList.remove("hidden");
-      }
-
-      if (nome === "chegada" && !(usuarioLogado.perfil === "chegada" || usuarioLogado.perfil === "admin")) {
-        document.getElementById("chegadaTela").classList.add("hidden");
-        document.getElementById("painelTela").classList.remove("hidden");
-      }
-    }
-
-    function gerarNumeroRemessa() {
-      const agora = new Date();
-      const ano = agora.getFullYear();
-      const base = String(Date.now()).slice(-4);
-      return `REM-${ano}-${base}`;
-    }
-
-    function pad2(n) {
-      return String(n).padStart(2, "0");
-    }
-
-    function criarRemessa() {
-      if (usuarioLogado.perfil !== "admin") return;
-
-      const origem = document.getElementById("origem").value.trim();
-      const destino = document.getElementById("destino").value.trim();
-      const cidade = document.getElementById("cidade").value.trim();
-      const material = document.getElementById("material").value.trim();
-      const quantidade = parseInt(document.getElementById("quantidade").value, 10);
-      const responsavel = document.getElementById("responsavel").value.trim();
-
-      if (!origem || !destino || !cidade || !material || !quantidade || !responsavel) {
-        alert("Preencha todos os campos.");
-        return;
-      }
-
-      const numero = gerarNumeroRemessa();
-      const criacao = new Date().toLocaleString("pt-BR");
-
-      remessa = {
-        numero,
-        origem,
-        destino,
-        cidade,
-        material,
-        quantidade,
-        responsavel,
-        criacao,
-        volumes: []
-      };
-
-      for (let i = 1; i <= quantidade; i++) {
-        remessa.volumes.push({
-          codigo: `${numero}-VOL-${pad2(i)}`,
-          etiqueta: `${pad2(i)}/${pad2(quantidade)}`,
-          status: "Pendente",
-          saidaEm: null,
-          chegadaEm: null,
-          tempoPercurso: null
-        });
-      }
-
-      salvar();
-      renderAdmin();
-      atualizarTudo();
-    }
-
-    function renderAdmin() {
-      if (!remessa) return;
-
-      document.getElementById("resumoRemessa").classList.remove("hidden");
-      document.getElementById("notaInterna").innerHTML = `
-        <strong>Remessa:</strong> ${remessa.numero}<br>
-        <strong>Origem:</strong> ${remessa.origem}<br>
-        <strong>Destino:</strong> ${remessa.destino}<br>
-        <strong>Cidade:</strong> ${remessa.cidade}<br>
-        <strong>Material:</strong> ${remessa.material}<br>
-        <strong>Volumes:</strong> ${remessa.quantidade}<br>
-        <strong>Responsável:</strong> ${remessa.responsavel}<br>
-        <strong>Data de emissão:</strong> ${remessa.criacao}<br>
-        <strong>Tipo:</strong> Transporte interno sem frete
-      `;
-
-      const area = document.getElementById("listaEtiquetas");
-      area.innerHTML = "";
-
-      remessa.volumes.forEach((v, index) => {
-        const div = document.createElement("div");
-        div.className = "etiqueta";
-        const canvasId = "qr_" + index;
-        div.innerHTML = `
-          <h4>Etiqueta ${v.etiqueta}</h4>
-          <div><strong>Remessa:</strong> ${remessa.numero}</div>
-          <div><strong>Volume:</strong> ${v.etiqueta}</div>
-          <div><strong>Código:</strong> ${v.codigo}</div>
-          <div><strong>Origem:</strong> ${remessa.origem}</div>
-          <div><strong>Destino:</strong> ${remessa.destino}</div>
-          <div><strong>Cidade:</strong> ${remessa.cidade}</div>
-          <div><strong>Material:</strong> ${remessa.material}</div>
-          <canvas id="${canvasId}" class="qrcanvas"></canvas>
-        `;
-        area.appendChild(div);
-
-        const qrPayload = JSON.stringify({
-          remessa: remessa.numero,
-          codigo: v.codigo,
-          volume: v.etiqueta,
-          origem: remessa.origem,
-          destino: remessa.destino
-        });
-
-        QRCode.toCanvas(document.getElementById(canvasId), qrPayload, { width: 120 });
-      });
-    }
-
-    function badgeStatus(status) {
-      if (status === "Pendente") return `<span class="badge b-pendente">Pendente</span>`;
-      if (status === "Saiu") return `<span class="badge b-saida">Saiu</span>`;
-      if (status === "Chegou") return `<span class="badge b-chegada">Chegou</span>`;
-      return `<span class="badge b-erro">${status}</span>`;
-    }
-
-    function registrarSaida(codigo) {
-      if (!remessa) return;
-      const volume = remessa.volumes.find(v => v.codigo === codigo);
-      if (!volume) return alert("Volume não encontrado.");
-      if (volume.status === "Chegou") return alert("Esse volume já foi recebido.");
-      if (volume.status === "Saiu") return alert("Esse volume já teve saída.");
-      volume.status = "Saiu";
-      volume.saidaEm = new Date().toISOString();
-      salvar();
-      atualizarTudo();
-    }
-
-    function registrarChegada(codigo) {
-      if (!remessa) return;
-      const volume = remessa.volumes.find(v => v.codigo === codigo);
-      if (!volume) return alert("Volume não encontrado.");
-      if (volume.status === "Pendente") return alert("Esse volume ainda não teve saída.");
-      if (volume.status === "Chegou") return alert("Esse volume já foi recebido.");
-      volume.status = "Chegou";
-      volume.chegadaEm = new Date().toISOString();
-      volume.tempoPercurso = calcularTempo(volume.saidaEm, volume.chegadaEm);
-      salvar();
-      atualizarTudo();
-    }
-
-    function registrarSaidaPorCodigo() {
-      const codigo = document.getElementById("codigoSaida").value.trim();
-      if (!codigo) return;
-      registrarSaida(codigo);
-      document.getElementById("codigoSaida").value = "";
-    }
-
-    function registrarChegadaPorCodigo() {
-      const codigo = document.getElementById("codigoChegada").value.trim();
-      if (!codigo) return;
-      registrarChegada(codigo);
-      document.getElementById("codigoChegada").value = "";
-    }
-
-    function calcularTempo(inicioISO, fimISO) {
-      if (!inicioISO || !fimISO) return "-";
-      const inicio = new Date(inicioISO);
-      const fim = new Date(fimISO);
-      const ms = fim - inicio;
-      const minutos = Math.floor(ms / 60000);
-      const horas = Math.floor(minutos / 60);
-      const resto = minutos % 60;
-      if (horas > 0) return `${horas}h ${resto}min`;
-      return `${resto} min`;
-    }
-
-    function formatarData(iso) {
-      if (!iso) return "-";
-      return new Date(iso).toLocaleString("pt-BR");
-    }
-
-    function atualizarTabelaSaida() {
-      const tbody = document.getElementById("saidaTabela");
-      tbody.innerHTML = "";
-
-      if (!remessa) {
-        tbody.innerHTML = `<tr><td colspan="3">Nenhuma remessa cadastrada.</td></tr>`;
-        return;
-      }
-
-      remessa.volumes.forEach(v => {
-        const tr = document.createElement("tr");
-        tr.innerHTML = `
-          <td>${v.codigo}<br><span class="mini">${v.etiqueta}</span></td>
-          <td>${badgeStatus(v.status)}</td>
-          <td><button class="btn" onclick="registrarSaida('${v.codigo}')">Dar saída</button></td>
-        `;
-        tbody.appendChild(tr);
-      });
-    }
-
-    function atualizarTabelaChegada() {
-      const tbody = document.getElementById("chegadaTabela");
-      tbody.innerHTML = "";
-
-      if (!remessa) {
-        tbody.innerHTML = `<tr><td colspan="4">Nenhuma remessa cadastrada.</td></tr>`;
-        return;
-      }
-
-      remessa.volumes.forEach(v => {
-        const tr = document.createElement("tr");
-        tr.innerHTML = `
-          <td>${v.codigo}<br><span class="mini">${v.etiqueta}</span></td>
-          <td>${badgeStatus(v.status)}</td>
-          <td>${formatarData(v.saidaEm)}</td>
-          <td><button class="btn2" onclick="registrarChegada('${v.codigo}')">Dar chegada</button></td>
-        `;
-        tbody.appendChild(tr);
-      });
-    }
-
-    function atualizarPainel() {
-      const tabela = document.getElementById("painelTabela");
-
-      if (!remessa) {
-        document.getElementById("p-remessa").textContent = "-";
-        document.getElementById("p-origem").textContent = "-";
-        document.getElementById("p-destino").textContent = "-";
-        document.getElementById("p-total").textContent = "0";
-        document.getElementById("p-saida").textContent = "0";
-        document.getElementById("p-chegada").textContent = "0";
-        document.getElementById("p-pendentes").textContent = "0";
-        document.getElementById("p-tempo").textContent = "-";
-        tabela.innerHTML = `<tr><td colspan="5">Nenhuma remessa cadastrada.</td></tr>`;
-        return;
-      }
-
-      document.getElementById("p-remessa").textContent = remessa.numero;
-      document.getElementById("p-origem").textContent = remessa.origem;
-      document.getElementById("p-destino").textContent = remessa.destino;
-
-      const total = remessa.volumes.length;
-      const saida = remessa.volumes.filter(v => v.status === "Saiu" || v.status === "Chegou").length;
-      const chegada = remessa.volumes.filter(v => v.status === "Chegou").length;
-      const pendentes = total - chegada;
-
-      document.getElementById("p-total").textContent = total;
-      document.getElementById("p-saida").textContent = saida;
-      document.getElementById("p-chegada").textContent = chegada;
-      document.getElementById("p-pendentes").textContent = pendentes;
-
-      const tempos = remessa.volumes
-        .filter(v => v.tempoPercurso)
-        .map(v => {
-          const t = v.tempoPercurso;
-          if (t.includes("h")) {
-            const [hPart, mPart] = t.replace("min","").split("h");
-            return (parseInt(hPart.trim(),10) * 60) + parseInt(mPart.trim(),10);
-          }
-          return parseInt(t, 10);
-        })
-        .filter(n => !isNaN(n));
-
-      if (tempos.length) {
-        const media = Math.round(tempos.reduce((a,b) => a+b, 0) / tempos.length);
-        const h = Math.floor(media / 60);
-        const m = media % 60;
-        document.getElementById("p-tempo").textContent = h > 0 ? `${h}h ${m}min` : `${m} min`;
-      } else {
-        document.getElementById("p-tempo").textContent = "-";
-      }
-
-      tabela.innerHTML = "";
-      remessa.volumes.forEach(v => {
-        const tr = document.createElement("tr");
-        tr.innerHTML = `
-          <td>${v.codigo}<br><span class="mini">${v.etiqueta}</span></td>
-          <td>${badgeStatus(v.status)}</td>
-          <td>${formatarData(v.saidaEm)}</td>
-          <td>${formatarData(v.chegadaEm)}</td>
-          <td>${v.tempoPercurso || "-"}</td>
-        `;
-        tabela.appendChild(tr);
-      });
-
-      const alerta = document.getElementById("painelAlerta");
-      if (saida > chegada) {
-        alerta.className = "alerta warn";
-        alerta.textContent = `Atenção: ${saida} volume(s) tiveram saída, mas apenas ${chegada} chegaram. Há divergência a regularizar.`;
-      } else if (total > 0 && chegada === total) {
-        alerta.className = "alerta ok";
-        alerta.textContent = "Todos os volumes foram recebidos com sucesso.";
-      } else {
-        alerta.className = "alerta ok";
-        alerta.textContent = "Nenhuma divergência encontrada.";
-      }
-    }
-
-    function atualizarTudo() {
-      if (remessa) renderAdmin();
-      atualizarTabelaSaida();
-      atualizarTabelaChegada();
-      atualizarPainel();
-    }
-
-    function resetarSistema() {
-      if (!confirm("Deseja apagar a remessa atual?")) return;
-      remessa = null;
-      localStorage.removeItem("remessaDemo");
-      document.getElementById("resumoRemessa").classList.add("hidden");
-      document.getElementById("notaInterna").innerHTML = "";
-      document.getElementById("listaEtiquetas").innerHTML = "";
-      atualizarTudo();
-    }
-
-    atualizarTudo();
-  </script>
+
+<div class="container">
+
+<div class="card">
+<h2>Criar Remessa</h2>
+
+<input id="origem" placeholder="Origem">
+<input id="destino" placeholder="Destino">
+<input id="material" placeholder="Material">
+<input id="volumes" type="number" placeholder="Quantidade">
+
+<button class="btn" onclick="criarRemessa()">Criar</button>
+</div>
+
+<div class="card">
+<h2>Saída</h2>
+<input id="codigoSaida" placeholder="Código">
+<button class="btn" onclick="registrarSaida()">Registrar Saída</button>
+</div>
+
+<div class="card">
+<h2>Chegada</h2>
+<input id="codigoChegada" placeholder="Código">
+<button class="btn" onclick="registrarChegada()">Registrar Chegada</button>
+</div>
+
+<div class="card">
+<h2>Status</h2>
+<div id="status"></div>
+</div>
+
+</div>
+
+<script type="module">
+
+// 🔥 FIREBASE CONFIG
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getFirestore, collection, addDoc, getDocs, updateDoc, doc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyBcG7UwJS7Fchdhfv7SbgP59AXWlwkmWwE",
+  authDomain: "rastreamento-saude.firebaseapp.com",
+  projectId: "rastreamento-saude",
+  storageBucket: "rastreamento-saude.firebasestorage.app",
+  messagingSenderId: "630037928416",
+  appId: "1:630037928416:web:616ef55c9e1ca251507385"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+// 🔥 CRIAR REMESSA
+window.criarRemessa = async function() {
+
+let origem = document.getElementById("origem").value;
+let destino = document.getElementById("destino").value;
+let material = document.getElementById("material").value;
+let qtd = parseInt(document.getElementById("volumes").value);
+
+let remessa = "REM-" + Date.now();
+
+for(let i=1;i<=qtd;i++){
+
+let codigo = remessa + "-VOL-" + String(i).padStart(2,"0");
+
+await addDoc(collection(db, "volumes"), {
+codigo,
+origem,
+destino,
+material,
+status:"AGUARDANDO",
+dataCriacao:new Date().toLocaleString()
+});
+
+}
+
+alert("Remessa criada com sucesso!");
+}
+
+// 🔵 SAÍDA
+window.registrarSaida = async function(){
+
+let codigo = document.getElementById("codigoSaida").value;
+
+let query = await getDocs(collection(db,"volumes"));
+
+query.forEach(async (item)=>{
+if(item.data().codigo === codigo){
+
+await updateDoc(doc(db,"volumes",item.id),{
+status:"EM TRANSPORTE",
+saida:new Date().toLocaleString()
+});
+
+alert("Saída registrada!");
+}
+});
+
+}
+
+// 🟣 CHEGADA
+window.registrarChegada = async function(){
+
+let codigo = document.getElementById("codigoChegada").value;
+
+let query = await getDocs(collection(db,"volumes"));
+
+query.forEach(async (item)=>{
+if(item.data().codigo === codigo){
+
+await updateDoc(doc(db,"volumes",item.id),{
+status:"ENTREGUE",
+chegada:new Date().toLocaleString()
+});
+
+alert("Chegada registrada!");
+}
+});
+
+}
+
+// 🔥 ATUALIZA STATUS EM TEMPO REAL
+async function carregar(){
+
+let lista = document.getElementById("status");
+lista.innerHTML="";
+
+let query = await getDocs(collection(db,"volumes"));
+
+query.forEach(item=>{
+let d = item.data();
+
+lista.innerHTML += `
+<p>
+${d.codigo} - ${d.status}
+</p>
+`;
+});
+
+}
+
+setInterval(carregar,2000);
+
+</script>
+
 </body>
 </html>
