@@ -470,6 +470,7 @@
           <button class="btn" onclick="criarRemessa()">Criar remessa</button>
           <button class="btn3" onclick="carregarEtiquetasUltimaRemessa()">Recarregar etiquetas</button>
           <button class="btn2" onclick="exportarEtiquetasPDF()">Exportar etiquetas em PDF</button>
+          <button class="btn-danger" onclick="apagarUltimaRemessaTeste()">Apagar última remessa de teste</button>
         </div>
 
         <div id="notaInternaBox" class="card hidden" style="margin-top:14px; background:#f8fafc;">
@@ -583,10 +584,10 @@
       addDoc,
       getDocs,
       updateDoc,
+      deleteDoc,
       doc,
       query,
       where,
-      orderBy,
       onSnapshot
     } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
@@ -805,13 +806,12 @@
     };
 
     async function buscarVolumesPorRemessa(remessaId) {
-      const q = query(
-        collection(db, "volumes"),
-        where("remessaId", "==", remessaId),
-        orderBy("volumeNumero")
-      );
-      const snap = await getDocs(q);
-      return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      const snap = await getDocs(collection(db, "volumes"));
+
+      return snap.docs
+        .map(d => ({ id: d.id, ...d.data() }))
+        .filter(item => item.remessaId === remessaId)
+        .sort((a, b) => (a.volumeNumero || 0) - (b.volumeNumero || 0));
     }
 
     window.carregarEtiquetasUltimaRemessa = async function () {
@@ -872,6 +872,43 @@
       } catch (error) {
         console.error(error);
         mostrarMensagem("Erro ao carregar etiquetas.", "warn");
+      }
+    };
+
+    window.apagarUltimaRemessaTeste = async function () {
+      try {
+        const remessaId = localStorage.getItem("ultimaRemessaId");
+
+        if (!remessaId) {
+          mostrarMensagem("Nenhuma remessa recente encontrada para apagar.", "warn");
+          return;
+        }
+
+        const volumes = await buscarVolumesPorRemessa(remessaId);
+
+        if (!volumes.length) {
+          mostrarMensagem("Nenhum volume encontrado para essa remessa.", "warn");
+          return;
+        }
+
+        const confirmar = confirm(`Deseja apagar a remessa ${remessaId} com ${volumes.length} volume(s)?`);
+        if (!confirmar) return;
+
+        for (const item of volumes) {
+          await deleteDoc(doc(db, "volumes", item.id));
+        }
+
+        localStorage.removeItem("ultimaRemessaId");
+
+        document.getElementById("notaInternaBox").classList.add("hidden");
+        document.getElementById("etiquetasBox").classList.add("hidden");
+        document.getElementById("notaInterna").innerHTML = "";
+        document.getElementById("listaEtiquetas").innerHTML = "";
+
+        mostrarMensagem("Remessa de teste apagada com sucesso.", "ok");
+      } catch (error) {
+        console.error(error);
+        mostrarMensagem("Erro ao apagar remessa de teste.", "warn");
       }
     };
 
