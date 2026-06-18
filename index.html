@@ -1,1435 +1,1148 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR">
+
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Rastreamento Hospitalar</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
-  <script src="https://unpkg.com/html5-qrcode"></script>
-  <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+    <title>Sistema Hospitalar - Rastreamento de Remessas</title>
 
-  <style>
-    * { box-sizing: border-box; }
+    <link rel="stylesheet" href="css/style.css">
 
-    :root {
-      --bg: #f3f7fb;
-      --card: #ffffff;
-      --card-soft: #f8fbff;
-      --text: #1f2937;
-      --muted: #64748b;
-      --border: #dbe5ef;
-      --primary: #0f766e;
-      --primary-2: #0ea5a4;
-      --blue: #2563eb;
-      --danger: #dc2626;
-      --warning-bg: #fff1f2;
-      --warning-text: #9f1239;
-      --success-bg: #ecfdf5;
-      --success-text: #065f46;
-      --shadow: 0 8px 24px rgba(15, 23, 42, .08);
-      --radius: 16px;
-    }
-
-    body {
-      margin: 0;
-      font-family: Arial, Helvetica, sans-serif;
-      background: linear-gradient(180deg, #eef7f6 0%, var(--bg) 280px);
-      color: var(--text);
-    }
-
-    .topo {
-      background: linear-gradient(135deg, #0f766e, #0ea5a4);
-      color: #fff;
-      padding: 26px 18px;
-      text-align: center;
-      box-shadow: 0 6px 20px rgba(14, 165, 164, .25);
-    }
-
-    .topo h1 {
-      margin: 0 0 8px;
-      font-size: 28px;
-    }
-
-    .topo p {
-      margin: 0;
-      opacity: .95;
-      font-size: 15px;
-    }
-
-    .container {
-      max-width: 1250px;
-      margin: 22px auto;
-      padding: 16px;
-    }
-
-    .card {
-      background: var(--card);
-      border-radius: var(--radius);
-      padding: 18px;
-      margin-bottom: 16px;
-      box-shadow: var(--shadow);
-      border: 1px solid rgba(219, 229, 239, .9);
-    }
-
-    h1, h2, h3 {
-      margin-top: 0;
-    }
-
-    .subtitulo {
-      color: var(--muted);
-      margin-top: -6px;
-      margin-bottom: 14px;
-      font-size: 14px;
-    }
-
-    label {
-      display: block;
-      font-size: 13px;
-      color: #334155;
-      font-weight: bold;
-      margin-bottom: 6px;
-    }
-
-    input, select {
-      width: 100%;
-      padding: 12px 13px;
-      border: 1px solid #cbd5e1;
-      border-radius: 12px;
-      margin: 0 0 12px;
-      font-size: 15px;
-      outline: none;
-      background: #fff;
-      transition: .2s ease;
-    }
-
-    input:focus, select:focus {
-      border-color: var(--primary-2);
-      box-shadow: 0 0 0 3px rgba(14, 165, 164, .14);
-    }
-
-    button {
-      border: none;
-      border-radius: 12px;
-      padding: 11px 16px;
-      cursor: pointer;
-      font-weight: bold;
-      margin: 4px 6px 4px 0;
-      transition: .2s ease;
-      font-size: 14px;
-    }
-
-    button:hover {
-      transform: translateY(-1px);
-    }
-
-    .btn { background: var(--primary); color: #fff; }
-    .btn2 { background: var(--blue); color: #fff; }
-    .btn3 { background: #e5e7eb; color: #111827; }
-    .btn-danger { background: var(--danger); color: #fff; }
-
-    .hidden { display: none !important; }
-
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 12px;
-    }
-
-    .linha {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-      align-items: end;
-    }
-
-    .linha > * {
-      flex: 1;
-      min-width: 180px;
-    }
-
-    .linha-auto {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-      align-items: center;
-    }
-
-    .linha-auto > * {
-      flex: unset;
-      min-width: unset;
-    }
-
-    .top-actions {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin-top: 10px;
-    }
-
-    .badge {
-      display: inline-block;
-      padding: 6px 11px;
-      border-radius: 999px;
-      font-size: 12px;
-      font-weight: bold;
-      white-space: nowrap;
-    }
-
-    .aguardando { background: #fef3c7; color: #92400e; }
-    .transporte { background: #dbeafe; color: #1d4ed8; }
-    .entregue { background: #dcfce7; color: #166534; }
-
-    .etiquetas {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
-      gap: 12px;
-    }
-
-    .etiqueta {
-      border: 2px dashed #0ea5a4;
-      border-radius: 14px;
-      padding: 14px;
-      background: #f8fffe;
-    }
-
-    .etiqueta h3 {
-      margin-bottom: 8px;
-    }
-
-    .etiqueta canvas {
-      margin-top: 12px;
-      background: #fff;
-      padding: 6px;
-      border-radius: 8px;
-      border: 1px solid #e5e7eb;
-    }
-
-    .status-boxes {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
-      gap: 12px;
-      margin-bottom: 14px;
-    }
-
-    .status-box {
-      background: var(--card-soft);
-      border: 1px solid #e2e8f0;
-      border-left: 5px solid var(--primary-2);
-      padding: 14px;
-      border-radius: 14px;
-      min-height: 85px;
-    }
-
-    .status-box strong {
-      display: block;
-      font-size: 13px;
-      color: var(--muted);
-      margin-bottom: 6px;
-    }
-
-    .status-box span {
-      font-size: 18px;
-      font-weight: bold;
-      color: var(--text);
-    }
-
-    .alerta {
-      border-radius: 12px;
-      padding: 12px 14px;
-      margin-top: 12px;
-      font-weight: bold;
-      border: 1px solid transparent;
-    }
-
-    .ok {
-      background: var(--success-bg);
-      color: var(--success-text);
-      border-color: #a7f3d0;
-    }
-
-    .warn {
-      background: #fef2f2;
-      color: #991b1b;
-      border-color: #fecaca;
-    }
-
-    .info {
-      background: #eff6ff;
-      color: #1d4ed8;
-      border-color: #bfdbfe;
-    }
-
-    .mini {
-      font-size: 12px;
-      color: var(--muted);
-    }
-
-    .muted {
-      color: var(--muted);
-    }
-
-    .toolbar {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-      margin-bottom: 12px;
-      align-items: end;
-    }
-
-    .toolbar > div {
-      min-width: 200px;
-      flex: 1;
-    }
-
-    .toolbar .acoes {
-      flex: unset;
-      min-width: unset;
-    }
-
-    .table-wrap {
-      overflow-x: auto;
-      border: 1px solid #e5e7eb;
-      border-radius: 14px;
-      background: #fff;
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      min-width: 900px;
-    }
-
-    th, td {
-      border-bottom: 1px solid #e5e7eb;
-      padding: 12px 10px;
-      text-align: left;
-      vertical-align: top;
-      font-size: 14px;
-    }
-
-    th {
-      background: #f8fafc;
-      position: sticky;
-      top: 0;
-      z-index: 1;
-    }
-
-    tr:hover td {
-      background: #fbfdff;
-    }
-
-    #readerSaida, #readerChegada {
-      margin-top: 10px;
-      width: 100%;
-      max-width: 360px;
-      min-height: 120px;
-      border-radius: 14px;
-      overflow: hidden;
-      background: #f8fafc;
-      border: 1px dashed #cbd5e1;
-      padding: 8px;
-    }
-
-    .login-box {
-      max-width: 420px;
-      margin: 0 auto;
-    }
-
-    .menu-info {
-      display: flex;
-      justify-content: space-between;
-      gap: 10px;
-      flex-wrap: wrap;
-      align-items: center;
-    }
-
-    .historico-lista {
-      display: grid;
-      gap: 10px;
-      margin-top: 10px;
-    }
-
-    .historico-item {
-      border: 1px solid #e5e7eb;
-      border-radius: 14px;
-      padding: 14px;
-      background: #fcfdff;
-    }
-
-    .historico-item strong {
-      display: block;
-      margin-bottom: 6px;
-    }
-
-    .pill {
-      display: inline-block;
-      padding: 4px 8px;
-      border-radius: 999px;
-      background: #ecfeff;
-      color: #155e75;
-      font-size: 12px;
-      font-weight: bold;
-      margin-right: 6px;
-      margin-top: 6px;
-    }
-
-    .sem-dados {
-      padding: 18px;
-      text-align: center;
-      color: var(--muted);
-      background: #fafafa;
-      border-radius: 12px;
-      border: 1px dashed #d1d5db;
-    }
-
-    @media (max-width: 700px) {
-      .topo h1 { font-size: 22px; }
-      .card { padding: 14px; }
-      button { width: 100%; margin-right: 0; }
-      .toolbar .acoes { width: 100%; }
-      .toolbar .acoes button { width: 100%; }
-      .menu-info { flex-direction: column; align-items: flex-start; }
-    }
-  </style>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
+    <script src="https://unpkg.com/html5-qrcode"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
 </head>
+
 <body>
-  <div class="topo">
-    <h1>Sistema de Rastreamento Hospitalar</h1>
-    <p>Controle interno de remessas, volumes, saída, chegada e divergências</p>
-  </div>
 
-  <div class="container">
-    <div id="mensagemSistema" class="alerta hidden"></div>
+    <!-- LOADING -->
 
-    <div id="loginCard" class="card login-box">
-      <h2>Login</h2>
-      <p class="subtitulo">Acesse conforme seu perfil operacional</p>
-
-      <label for="loginUsuario">Usuário</label>
-      <input id="loginUsuario" placeholder="Usuário" />
-
-      <label for="loginSenha">Senha</label>
-      <input id="loginSenha" type="password" placeholder="Senha" />
-
-      <button class="btn" onclick="fazerLogin()">Entrar</button>
-      <div id="erroLogin" class="alerta warn hidden">Usuário ou senha inválidos.</div>
+    <div id="loadingScreen" class="loading-screen">
+        <div class="loading-card">
+            <div class="spinner"></div>
+            <h2>Carregando Sistema</h2>
+            <p>Aguarde...</p>
+        </div>
     </div>
 
-    <div id="appArea" class="hidden">
-      <div class="card">
-        <div class="menu-info">
-          <div>
-            <strong>Usuário:</strong> <span id="usuarioLogadoTexto"></span><br>
-            <span class="mini"><strong>Perfil:</strong> <span id="perfilLogadoTexto"></span></span>
-          </div>
+    <!-- ALERTAS -->
 
-          <div class="top-actions">
-            <button class="btn3" onclick="mostrarSecao('painel')">Painel</button>
-            <button class="btn3" onclick="mostrarSecao('historico')">Histórico</button>
-            <button class="btn3" onclick="mostrarSecao('admin')">Admin</button>
-            <button class="btn3" onclick="mostrarSecao('saida')">Saída</button>
-            <button class="btn3" onclick="mostrarSecao('chegada')">Chegada</button>
-            <button class="btn-danger" onclick="logout()">Sair</button>
-          </div>
-        </div>
-      </div>
+    <div id="toastContainer" class="toast-container"></div>
 
-      <div id="secaoAdmin" class="card hidden">
-        <h2>Criar remessa</h2>
-        <p class="subtitulo">Cadastre a remessa e gere as etiquetas dos volumes</p>
+    <!-- LOGIN -->
 
-        <div class="grid">
-          <div>
-            <label>Origem</label>
-            <input id="origem" placeholder="Ex: Hospital Feminino" />
-          </div>
-          <div>
-            <label>Destino</label>
-            <input id="destino" placeholder="Ex: Central de Tratamento" />
-          </div>
-          <div>
-            <label>Cidade</label>
-            <input id="cidade" placeholder="Ex: Ariquemes - RO" />
-          </div>
-          <div>
-            <label>Material</label>
-            <input id="material" placeholder="Ex: Seringas" />
-          </div>
-          <div>
-            <label>Responsável</label>
-            <input id="responsavel" placeholder="Ex: Setor interno" />
-          </div>
-          <div>
-            <label>Quantidade de volumes</label>
-            <input id="quantidade" type="number" min="1" placeholder="Ex: 6" />
-          </div>
+    <section id="loginSection" class="login-section">
+
+        <div class="login-card">
+
+            <div class="login-header">
+                <h1>Rastreamento Hospitalar</h1>
+                <p>Controle de remessas e descarte hospitalar</p>
+            </div>
+
+            <form id="loginForm">
+
+                <div class="form-group">
+                    <label>Usuário</label>
+                    <input
+                        type="text"
+                        id="loginUsuario"
+                        autocomplete="username"
+                        placeholder="Digite seu usuário">
+                </div>
+
+                <div class="form-group">
+                    <label>Senha</label>
+                    <input
+                        type="password"
+                        id="loginSenha"
+                        autocomplete="current-password"
+                        placeholder="Digite sua senha">
+                </div>
+
+                <button
+                    type="submit"
+                    class="btn btn-primary btn-full">
+                    Entrar
+                </button>
+
+            </form>
+
+            <div id="loginErro" class="alert alert-danger hidden"></div>
+
         </div>
 
-        <div class="linha-auto">
-          <button class="btn" onclick="criarRemessa()">Criar remessa</button>
-          <button class="btn3" onclick="carregarEtiquetasUltimaRemessa()">Recarregar etiquetas</button>
-          <button class="btn2" onclick="exportarEtiquetasPDF()">Exportar etiquetas em PDF</button>
-          <button class="btn-danger" onclick="apagarUltimaRemessaTeste()">Apagar última remessa de teste</button>
+    </section>
+
+    <!-- APP -->
+
+    <section id="appSection" class="hidden">
+
+        <!-- HEADER -->
+
+        <header class="topbar">
+
+            <div class="topbar-left">
+
+                <h2>Sistema Hospitalar</h2>
+
+            </div>
+
+            <div class="topbar-right">
+
+                <div class="usuario-box">
+
+                    <div>
+                        <strong id="usuarioNomeTopo">Usuário</strong>
+                        <small id="usuarioPerfilTopo">Perfil</small>
+                    </div>
+
+                </div>
+
+                <button
+                    id="btnLogout"
+                    class="btn btn-danger">
+                    Sair
+                </button>
+
+            </div>
+
+        </header>
+
+        <!-- MENU -->
+
+        <aside class="sidebar">
+
+            <button class="menu-btn active" data-screen="dashboardScreen">
+                Dashboard
+            </button>
+
+            <button class="menu-btn admin-only" data-screen="usuariosScreen">
+                Funcionários
+            </button>
+
+            <button class="menu-btn admin-only" data-screen="remessasScreen">
+                Remessas
+            </button>
+
+            <button class="menu-btn saida-only" data-screen="saidaScreen">
+                Registrar Saída
+            </button>
+
+            <button class="menu-btn chegada-only" data-screen="chegadaScreen">
+                Registrar Chegada
+            </button>
+
+            <button class="menu-btn descarte-only" data-screen="descarteScreen">
+                Registrar Descarte
+            </button>
+
+            <button class="menu-btn" data-screen="historicoScreen">
+                Histórico
+            </button>
+
+            <button class="menu-btn admin-only" data-screen="relatoriosScreen">
+                Relatórios
+            </button>
+
+            <button class="menu-btn admin-only" data-screen="auditoriaScreen">
+                Auditoria
+            </button>
+
+        </aside>
+
+        <!-- CONTEÚDO -->
+
+        <main class="main-content">
+
+            <!-- DASHBOARD -->
+
+            <section
+                id="dashboardScreen"
+                class="screen">
+
+                <div class="page-header">
+                    <h2>Dashboard</h2>
+                    <p>Resumo geral das operações</p>
+                </div>
+
+                <div class="stats-grid">
+
+                    <div class="stat-card">
+                        <span>Total de Remessas</span>
+                        <h3 id="totalRemessas">0</h3>
+                    </div>
+
+                    <div class="stat-card">
+                        <span>Volumes</span>
+                        <h3 id="totalVolumes">0</h3>
+                    </div>
+
+                    <div class="stat-card">
+                        <span>Em Transporte</span>
+                        <h3 id="totalTransporte">0</h3>
+                    </div>
+
+                    <div class="stat-card">
+                        <span>Entregues</span>
+                        <h3 id="totalEntregues">0</h3>
+                    </div>
+
+                    <div class="stat-card">
+                        <span>Descartados</span>
+                        <h3 id="totalDescartados">0</h3>
+                    </div>
+
+                    <div class="stat-card">
+                        <span>Pendências</span>
+                        <h3 id="totalPendencias">0</h3>
+                    </div>
+
+                </div>
+
+                <div class="dashboard-panels">
+
+                    <div class="card">
+
+                        <h3>Últimas Movimentações</h3>
+
+                        <div id="ultimasMovimentacoes"></div>
+
+                    </div>
+
+                    <div class="card">
+
+                        <h3>Divergências</h3>
+
+                        <div id="listaDivergencias"></div>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+            <!-- USUÁRIOS -->
+
+            <section
+                id="usuariosScreen"
+                class="screen hidden">
+
+                <div class="page-header">
+                    <h2>Funcionários</h2>
+                    <p>Gerenciamento de usuários do sistema</p>
+                </div>
+
+                <div class="card">
+
+                    <div class="actions-row">
+
+                        <button
+                            id="btnNovoFuncionario"
+                            class="btn btn-primary">
+                            Novo Funcionário
+                        </button>
+
+                    </div>
+
+                    <div class="table-responsive">
+
+                        <table>
+
+                            <thead>
+
+                                <tr>
+                                    <th>Nome</th>
+                                    <th>Usuário</th>
+                                    <th>Código</th>
+                                    <th>Perfil</th>
+                                    <th>Status</th>
+                                    <th>Ações</th>
+                                </tr>
+
+                            </thead>
+
+                            <tbody id="usuariosTabela"></tbody>
+
+                        </table>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+            <!-- REMESSAS -->
+
+            <section
+                id="remessasScreen"
+                class="screen hidden">
+
+                <div class="page-header">
+                    <h2>Remessas</h2>
+                    <p>Cadastro e geração de etiquetas</p>
+                </div>
+
+                <div class="card">
+
+                    <form id="formRemessa">
+
+                        <div class="grid-2">
+
+                            <div class="form-group">
+                                <label>Origem</label>
+                                <input
+                                    type="text"
+                                    id="origem">
+                            </div>
+
+                            <div class="form-group">
+                                <label>Destino</label>
+                                <input
+                                    type="text"
+                                    id="destino">
+                            </div>
+
+                            <div class="form-group">
+                                <label>Cidade</label>
+                                <input
+                                    type="text"
+                                    id="cidade">
+                            </div>
+
+                            <div class="form-group">
+                                <label>Material</label>
+                                <input
+                                    type="text"
+                                    id="material">
+                            </div>
+
+                            <div class="form-group">
+                                <label>Responsável</label>
+                                <input
+                                    type="text"
+                                    id="responsavel">
+                            </div>
+
+                            <div class="form-group">
+                                <label>Quantidade de Volumes</label>
+                                <input
+                                    type="number"
+                                    min="1"
+                                    id="quantidadeVolumes">
+                            </div>
+
+                        </div>
+
+                        <button
+                            type="submit"
+                            class="btn btn-primary">
+                            Criar Remessa
+                        </button>
+
+                    </form>
+
+                </div>
+
+                <div class="card">
+
+                    <h3>Etiquetas Geradas</h3>
+
+                    <div id="etiquetasContainer"></div>
+
+                </div>
+
+            </section>
+
+            <!-- SAÍDA -->
+
+            <section
+                id="saidaScreen"
+                class="screen hidden">
+
+                <div class="page-header">
+                    <h2>Registrar Saída</h2>
+                    <p>Registrar volume em transporte</p>
+                </div>
+
+                <div class="card">
+
+                    <div class="form-group">
+                        <label>Código do Volume</label>
+                        <input
+                            type="text"
+                            id="codigoSaida">
+                    </div>
+
+                    <div class="actions-row">
+
+                        <button
+                            id="btnRegistrarSaida"
+                            class="btn btn-primary">
+                            Registrar
+                        </button>
+
+                        <button
+                            id="btnAbrirCameraSaida"
+                            class="btn btn-secondary">
+                            Ler QR Code
+                        </button>
+
+                    </div>
+
+                    <div id="readerSaida"></div>
+
+                </div>            <!-- CHEGADA -->
+
+            <section
+                id="chegadaScreen"
+                class="screen hidden">
+
+                <div class="page-header">
+                    <h2>Registrar Chegada</h2>
+                    <p>Finalizar recebimento de volume</p>
+                </div>
+
+                <div class="card">
+
+                    <div class="form-group">
+                        <label>Código do Volume</label>
+                        <input
+                            type="text"
+                            id="codigoChegada">
+                    </div>
+
+                    <div class="actions-row">
+
+                        <button
+                            id="btnRegistrarChegada"
+                            class="btn btn-primary">
+                            Registrar
+                        </button>
+
+                        <button
+                            id="btnAbrirCameraChegada"
+                            class="btn btn-secondary">
+                            Ler QR Code
+                        </button>
+
+                    </div>
+
+                    <div id="readerChegada"></div>
+
+                </div>
+
+            </section>
+
+            <!-- DESCARTE -->
+
+            <section
+                id="descarteScreen"
+                class="screen hidden">
+
+                <div class="page-header">
+                    <h2>Registrar Descarte</h2>
+                    <p>Descarte controlado de material hospitalar</p>
+                </div>
+
+                <div class="card">
+
+                    <div class="form-group">
+                        <label>Código do Volume</label>
+                        <input
+                            type="text"
+                            id="codigoDescarte">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Motivo do Descarte</label>
+                        <select id="motivoDescarte">
+
+                            <option value="">
+                                Selecione
+                            </option>
+
+                            <option value="Material vencido">
+                                Material vencido
+                            </option>
+
+                            <option value="Material contaminado">
+                                Material contaminado
+                            </option>
+
+                            <option value="Avaria">
+                                Avaria
+                            </option>
+
+                            <option value="Erro operacional">
+                                Erro operacional
+                            </option>
+
+                            <option value="Outro">
+                                Outro
+                            </option>
+
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Observações</label>
+                        <textarea
+                            id="observacaoDescarte"
+                            rows="4"></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Foto do Descarte *</label>
+
+                        <input
+                            type="file"
+                            accept="image/*"
+                            capture="environment"
+                            id="fotoDescarte">
+                    </div>
+
+                    <div class="actions-row">
+
+                        <button
+                            id="btnRegistrarDescarte"
+                            class="btn btn-danger">
+                            Registrar Descarte
+                        </button>
+
+                        <button
+                            id="btnAbrirCameraDescarte"
+                            class="btn btn-secondary">
+                            Ler QR Code
+                        </button>
+
+                    </div>
+
+                    <div id="readerDescarte"></div>
+
+                </div>
+
+            </section>
+
+            <!-- HISTÓRICO -->
+
+            <section
+                id="historicoScreen"
+                class="screen hidden">
+
+                <div class="page-header">
+                    <h2>Histórico</h2>
+                    <p>Consulta completa das movimentações</p>
+                </div>
+
+                <div class="card">
+
+                    <div class="filters-grid">
+
+                        <div class="form-group">
+                            <label>Remessa</label>
+                            <select id="filtroRemessaHistorico"></select>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Status</label>
+                            <select id="filtroStatusHistorico">
+
+                                <option value="">
+                                    Todos
+                                </option>
+
+                                <option value="AGUARDANDO">
+                                    Aguardando
+                                </option>
+
+                                <option value="EM_TRANSPORTE">
+                                    Em Transporte
+                                </option>
+
+                                <option value="ENTREGUE">
+                                    Entregue
+                                </option>
+
+                                <option value="DESCARTADO">
+                                    Descartado
+                                </option>
+
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Código</label>
+                            <input
+                                type="text"
+                                id="filtroCodigoHistorico">
+                        </div>
+
+                    </div>
+
+                    <div class="table-responsive">
+
+                        <table>
+
+                            <thead>
+
+                                <tr>
+
+                                    <th>Código</th>
+                                    <th>Remessa</th>
+                                    <th>Status</th>
+                                    <th>Origem</th>
+                                    <th>Destino</th>
+                                    <th>Última Atualização</th>
+                                    <th>Detalhes</th>
+
+                                </tr>
+
+                            </thead>
+
+                            <tbody id="historicoTabela"></tbody>
+
+                        </table>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+            <!-- RELATÓRIOS -->
+
+            <section
+                id="relatoriosScreen"
+                class="screen hidden">
+
+                <div class="page-header">
+                    <h2>Relatórios</h2>
+                    <p>Exportação e impressão</p>
+                </div>
+
+                <div class="card">
+
+                    <div class="actions-grid">
+
+                        <button
+                            id="btnRelatorioRemessas"
+                            class="btn btn-primary">
+                            Relatório de Remessas
+                        </button>
+
+                        <button
+                            id="btnRelatorioVolumes"
+                            class="btn btn-primary">
+                            Relatório de Volumes
+                        </button>
+
+                        <button
+                            id="btnRelatorioDescarte"
+                            class="btn btn-danger">
+                            Relatório de Descartes
+                        </button>
+
+                        <button
+                            id="btnRelatorioAuditoria"
+                            class="btn btn-secondary">
+                            Relatório de Auditoria
+                        </button>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+            <!-- AUDITORIA -->
+
+            <section
+                id="auditoriaScreen"
+                class="screen hidden">
+
+                <div class="page-header">
+                    <h2>Auditoria</h2>
+                    <p>Registro completo de ações dos usuários</p>
+                </div>
+
+                <div class="card">
+
+                    <div class="table-responsive">
+
+                        <table>
+
+                            <thead>
+
+                                <tr>
+
+                                    <th>Data</th>
+                                    <th>Usuário</th>
+                                    <th>Código</th>
+                                    <th>Perfil</th>
+                                    <th>Ação</th>
+                                    <th>Detalhes</th>
+
+                                </tr>
+
+                            </thead>
+
+                            <tbody id="auditoriaTabela"></tbody>
+
+                        </table>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+        </main>
+
+    </section>
+
+    <!-- MODAL FUNCIONÁRIO -->
+
+    <div
+        id="modalFuncionario"
+        class="modal hidden">
+
+        <div class="modal-content">
+
+            <div class="modal-header">
+
+                <h3>Novo Funcionário</h3>
+
+                <button
+                    id="fecharModalFuncionario"
+                    class="modal-close">
+                    ×
+                </button>
+
+            </div>
+
+            <form id="formFuncionario">
+
+                <div class="form-group">
+                    <label>Nome Completo</label>
+                    <input
+                        type="text"
+                        id="funcionarioNome">
+                </div>
+
+                <div class="form-group">
+                    <label>Usuário</label>
+                    <input
+                        type="text"
+                        id="funcionarioUsuario">
+                </div>
+
+                <div class="form-group">
+                    <label>Senha</label>
+                    <input
+                        type="password"
+                        id="funcionarioSenha">
+                </div>
+
+                <div class="form-group">
+                    <label>Perfil</label>
+                    <select id="funcionarioPerfil">
+
+                        <option value="saida">
+                            Saída
+                        </option>
+
+                        <option value="chegada">
+                            Chegada
+                        </option>
+
+                        <option value="descarte">
+                            Descarte
+                        </option>
+
+                    </select>
+                </div>
+
+                <button
+                    type="submit"
+                    class="btn btn-primary">
+                    Salvar Funcionário
+                </button>
+
+            </form>
+
         </div>
 
-        <div id="notaInternaBox" class="card hidden" style="margin-top:14px; background:#f8fafc;">
-          <h3>Nota interna</h3>
-          <div id="notaInterna"></div>
-        </div>
-
-        <div id="etiquetasBox" class="hidden" style="margin-top:14px;">
-          <h3>Etiquetas dos volumes</h3>
-          <div id="listaEtiquetas" class="etiquetas"></div>
-        </div>
-      </div>
-
-      <div id="secaoSaida" class="card hidden">
-        <h2>Registrar saída</h2>
-        <p class="subtitulo">Informe manualmente ou use a câmera para leitura do QR Code</p>
-
-        <label for="codigoSaida">Código manual</label>
-        <input id="codigoSaida" placeholder="Código manual" />
-
-        <div class="linha-auto">
-          <button class="btn" onclick="registrarSaidaManual()">Registrar saída manual</button>
-          <button class="btn2" onclick="iniciarLeitorSaida()">Ler QR pela câmera</button>
-          <button class="btn3" onclick="pararLeitorSaida()">Parar leitor</button>
-        </div>
-
-        <div id="readerSaida"></div>
-      </div>
-
-      <div id="secaoChegada" class="card hidden">
-        <h2>Registrar chegada</h2>
-        <p class="subtitulo">Finalize o volume recebido manualmente ou por leitura de QR</p>
-
-        <label for="codigoChegada">Código manual</label>
-        <input id="codigoChegada" placeholder="Código manual" />
-
-        <div class="linha-auto">
-          <button class="btn" onclick="registrarChegadaManual()">Registrar chegada manual</button>
-          <button class="btn2" onclick="iniciarLeitorChegada()">Ler QR pela câmera</button>
-          <button class="btn3" onclick="pararLeitorChegada()">Parar leitor</button>
-        </div>
-
-        <div id="readerChegada"></div>
-      </div>
-
-      <div id="secaoPainel" class="card">
-        <h2>Painel em tempo real</h2>
-        <p class="subtitulo">Acompanhe status, filtros e divergências da remessa</p>
-
-        <div class="toolbar">
-          <div>
-            <label>Filtrar por remessa</label>
-            <select id="filtroRemessa"></select>
-          </div>
-
-          <div>
-            <label>Buscar por código</label>
-            <input id="buscaCodigo" placeholder="Ex: REM-xxxx-VOL-01" />
-          </div>
-
-          <div class="acoes">
-            <label>&nbsp;</label>
-            <button class="btn3" onclick="limparFiltrosPainel()">Limpar filtros</button>
-            <button class="btn2" onclick="exportarRelatorioPDF()">Exportar relatório PDF</button>
-          </div>
-        </div>
-
-        <div class="status-boxes">
-          <div class="status-box"><strong>Remessa atual</strong><span id="resumoRemessa">-</span></div>
-          <div class="status-box"><strong>Volumes totais</strong><span id="resumoTotal">0</span></div>
-          <div class="status-box"><strong>Com saída</strong><span id="resumoSaida">0</span></div>
-          <div class="status-box"><strong>Com chegada</strong><span id="resumoChegada">0</span></div>
-          <div class="status-box"><strong>Pendentes</strong><span id="resumoPendentes">0</span></div>
-          <div class="status-box"><strong>Tempo médio</strong><span id="resumoTempo">-</span></div>
-        </div>
-
-        <div id="alertaPainel" class="alerta ok">Nenhuma divergência encontrada.</div>
-
-        <div class="table-wrap">
-          <table>
-            <thead>
-              <tr>
-                <th>Código</th>
-                <th>Status</th>
-                <th>Origem</th>
-                <th>Destino</th>
-                <th>Material</th>
-                <th>Saída</th>
-                <th>Chegada</th>
-                <th>Tempo</th>
-              </tr>
-            </thead>
-            <tbody id="tabelaStatus"></tbody>
-          </table>
-        </div>
-      </div>
-
-      <div id="secaoHistorico" class="card hidden">
-        <h2>Histórico de remessas</h2>
-        <p class="subtitulo">Visualize rapidamente remessas já criadas no sistema</p>
-        <div id="listaHistorico" class="historico-lista"></div>
-      </div>
     </div>
-  </div>
-
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-    import {
-      getFirestore,
-      collection,
-      addDoc,
-      getDocs,
-      updateDoc,
-      deleteDoc,
-      doc,
-      query,
-      where,
-      onSnapshot
-    } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-
-    const firebaseConfig = {
-      apiKey: "AIzaSyBcG7UwJS7Fchdhfv7SbgP59AXWlwkmWwE",
-      authDomain: "rastreamento-saude.firebaseapp.com",
-      projectId: "rastreamento-saude",
-      storageBucket: "rastreamento-saude.firebasestorage.app",
-      messagingSenderId: "630037928416",
-      appId: "1:630037928416:web:616ef55c9e1ca251507385"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-
-    const usuarios = {
-      admin: { senha: "1234", perfil: "admin" },
-      saida: { senha: "1234", perfil: "saida" },
-      chegada: { senha: "1234", perfil: "chegada" }
-    };
-
-    let usuarioAtual = null;
-    let html5QrSaida = null;
-    let html5QrChegada = null;
-    let todosVolumes = [];
-    let ultimoQrLidoSaida = "";
-    let ultimoQrLidoChegada = "";
-    let ultimaLeituraSaida = 0;
-    let ultimaLeituraChegada = 0;
-
-    function mostrarMensagem(texto, tipo = "ok") {
-      const box = document.getElementById("mensagemSistema");
-      box.textContent = texto;
-      box.className = `alerta ${tipo}`;
-      box.classList.remove("hidden");
-
-      setTimeout(() => {
-        box.classList.add("hidden");
-      }, 3500);
-    }
-
-    function pad2(n) {
-      return String(n).padStart(2, "0");
-    }
-
-    function formatarData(ms) {
-      if (!ms) return "-";
-      return new Date(ms).toLocaleString("pt-BR");
-    }
-
-    function formatarTempo(minutos) {
-      if (minutos == null || isNaN(minutos)) return "-";
-      const h = Math.floor(minutos / 60);
-      const m = minutos % 60;
-      return h > 0 ? `${h}h ${m}min` : `${m} min`;
-    }
-
-    function classeStatus(status) {
-      if (status === "AGUARDANDO") return "badge aguardando";
-      if (status === "EM TRANSPORTE") return "badge transporte";
-      if (status === "ENTREGUE") return "badge entregue";
-      return "badge";
-    }
-
-    function validarTransicaoStatus(atual, proximo) {
-      const fluxo = {
-        AGUARDANDO: ["EM TRANSPORTE"],
-        "EM TRANSPORTE": ["ENTREGUE"],
-        ENTREGUE: []
-      };
-      return fluxo[atual]?.includes(proximo);
-    }
-
-    function limparCamposRemessa() {
-      document.getElementById("origem").value = "";
-      document.getElementById("destino").value = "";
-      document.getElementById("cidade").value = "";
-      document.getElementById("material").value = "";
-      document.getElementById("responsavel").value = "";
-      document.getElementById("quantidade").value = "";
-    }
-
-    window.fazerLogin = function () {
-      const usuario = document.getElementById("loginUsuario").value.trim();
-      const senha = document.getElementById("loginSenha").value.trim();
-
-      if (!usuarios[usuario] || usuarios[usuario].senha !== senha) {
-        document.getElementById("erroLogin").classList.remove("hidden");
-        return;
-      }
-
-      usuarioAtual = { nome: usuario, perfil: usuarios[usuario].perfil };
-      document.getElementById("erroLogin").classList.add("hidden");
-      document.getElementById("loginCard").classList.add("hidden");
-      document.getElementById("appArea").classList.remove("hidden");
-      document.getElementById("usuarioLogadoTexto").textContent = usuarioAtual.nome;
-      document.getElementById("perfilLogadoTexto").textContent = usuarioAtual.perfil.toUpperCase();
-
-      mostrarSecao("painel");
-
-      if (usuarioAtual.perfil === "admin") {
-        carregarEtiquetasUltimaRemessa();
-      }
-
-      mostrarMensagem("Login realizado com sucesso.", "ok");
-    };
-
-    window.logout = async function () {
-      await pararLeitorSaida();
-      await pararLeitorChegada();
-
-      usuarioAtual = null;
-      document.getElementById("appArea").classList.add("hidden");
-      document.getElementById("loginCard").classList.remove("hidden");
-      document.getElementById("loginUsuario").value = "";
-      document.getElementById("loginSenha").value = "";
-      mostrarMensagem("Sessão encerrada.", "info");
-    };
-
-    window.mostrarSecao = function (secao) {
-      document.getElementById("secaoAdmin").classList.add("hidden");
-      document.getElementById("secaoSaida").classList.add("hidden");
-      document.getElementById("secaoChegada").classList.add("hidden");
-      document.getElementById("secaoPainel").classList.add("hidden");
-      document.getElementById("secaoHistorico").classList.add("hidden");
-
-      if (secao === "painel") {
-        document.getElementById("secaoPainel").classList.remove("hidden");
-        return;
-      }
-
-      if (secao === "historico") {
-        document.getElementById("secaoHistorico").classList.remove("hidden");
-        renderizarHistorico();
-        return;
-      }
-
-      if (secao === "admin") {
-        if (usuarioAtual?.perfil !== "admin") {
-          mostrarMensagem("Acesso permitido apenas para administrador.", "warn");
-          return;
-        }
-        document.getElementById("secaoAdmin").classList.remove("hidden");
-        return;
-      }
-
-      if (secao === "saida") {
-        if (!(usuarioAtual?.perfil === "saida" || usuarioAtual?.perfil === "admin")) {
-          mostrarMensagem("Acesso não permitido para este perfil.", "warn");
-          return;
-        }
-        document.getElementById("secaoSaida").classList.remove("hidden");
-        return;
-      }
-
-      if (secao === "chegada") {
-        if (!(usuarioAtual?.perfil === "chegada" || usuarioAtual?.perfil === "admin")) {
-          mostrarMensagem("Acesso não permitido para este perfil.", "warn");
-          return;
-        }
-        document.getElementById("secaoChegada").classList.remove("hidden");
-      }
-    };
-
-    window.criarRemessa = async function () {
-      try {
-        const origem = document.getElementById("origem").value.trim();
-        const destino = document.getElementById("destino").value.trim();
-        const cidade = document.getElementById("cidade").value.trim();
-        const material = document.getElementById("material").value.trim();
-        const responsavel = document.getElementById("responsavel").value.trim();
-        const quantidade = parseInt(document.getElementById("quantidade").value, 10);
-
-        if (!origem || !destino || !cidade || !material || !responsavel || !quantidade || quantidade < 1) {
-          mostrarMensagem("Preencha todos os campos corretamente.", "warn");
-          return;
-        }
-
-        if (quantidade > 500) {
-          mostrarMensagem("Quantidade de volumes muito alta. Limite recomendado: 500.", "warn");
-          return;
-        }
-
-        const remessaId = `REM-${Date.now()}`;
-        const criadoEm = Date.now();
-
-        for (let i = 1; i <= quantidade; i++) {
-          const codigo = `${remessaId}-VOL-${pad2(i)}`;
-          await addDoc(collection(db, "volumes"), {
-            remessaId,
-            codigo,
-            volumeNumero: i,
-            volumeEtiqueta: `${pad2(i)}/${pad2(quantidade)}`,
-            quantidadeVolumes: quantidade,
-            origem,
-            destino,
-            cidade,
-            material,
-            responsavel,
-            status: "AGUARDANDO",
-            criadoEm,
-            saidaEm: null,
-            chegadaEm: null,
-            tempoMin: null
-          });
-        }
-
-        localStorage.setItem("ultimaRemessaId", remessaId);
-        limparCamposRemessa();
-        mostrarMensagem("Remessa criada com sucesso.", "ok");
-        await carregarEtiquetasUltimaRemessa();
-      } catch (error) {
-        console.error(error);
-        mostrarMensagem("Erro ao criar remessa.", "warn");
-      }
-    };
-
-    async function buscarVolumesPorRemessa(remessaId) {
-      const snap = await getDocs(collection(db, "volumes"));
-
-      return snap.docs
-        .map(d => ({ id: d.id, ...d.data() }))
-        .filter(item => item.remessaId === remessaId)
-        .sort((a, b) => (a.volumeNumero || 0) - (b.volumeNumero || 0));
-    }
-
-    window.carregarEtiquetasUltimaRemessa = async function () {
-      try {
-        const remessaId = localStorage.getItem("ultimaRemessaId");
-        if (!remessaId) {
-          mostrarMensagem("Nenhuma remessa recente encontrada.", "info");
-          return;
-        }
-
-        const docs = await buscarVolumesPorRemessa(remessaId);
-        if (!docs.length) {
-          mostrarMensagem("Nenhuma etiqueta encontrada para a última remessa.", "info");
-          return;
-        }
-
-        const primeiro = docs[0];
-
-        document.getElementById("notaInternaBox").classList.remove("hidden");
-        document.getElementById("etiquetasBox").classList.remove("hidden");
-
-        document.getElementById("notaInterna").innerHTML = `
-          <strong>Remessa:</strong> ${primeiro.remessaId}<br>
-          <strong>Origem:</strong> ${primeiro.origem}<br>
-          <strong>Destino:</strong> ${primeiro.destino}<br>
-          <strong>Cidade:</strong> ${primeiro.cidade}<br>
-          <strong>Material:</strong> ${primeiro.material}<br>
-          <strong>Volumes:</strong> ${primeiro.quantidadeVolumes}<br>
-          <strong>Responsável:</strong> ${primeiro.responsavel}<br>
-          <strong>Tipo:</strong> Transporte interno sem frete
-        `;
-
-        const area = document.getElementById("listaEtiquetas");
-        area.innerHTML = "";
-
-        docs.forEach((item, index) => {
-          const canvasId = `qr_${index}`;
-          const div = document.createElement("div");
-          div.className = "etiqueta";
-          div.innerHTML = `
-            <h3>Etiqueta ${item.volumeEtiqueta}</h3>
-            <div><strong>Remessa:</strong> ${item.remessaId}</div>
-            <div><strong>Volume:</strong> ${item.volumeEtiqueta}</div>
-            <div><strong>Código:</strong> ${item.codigo}</div>
-            <div><strong>Origem:</strong> ${item.origem}</div>
-            <div><strong>Destino:</strong> ${item.destino}</div>
-            <div><strong>Cidade:</strong> ${item.cidade}</div>
-            <div><strong>Material:</strong> ${item.material}</div>
-            <canvas id="${canvasId}"></canvas>
-          `;
-          area.appendChild(div);
-
-          const canvas = document.getElementById(canvasId);
-          QRCode.toCanvas(canvas, item.codigo, { width: 140 }, function (error) {
-            if (error) console.error(error);
-          });
-        });
-      } catch (error) {
-        console.error(error);
-        mostrarMensagem("Erro ao carregar etiquetas.", "warn");
-      }
-    };
-
-    window.apagarUltimaRemessaTeste = async function () {
-      try {
-        const remessaId = localStorage.getItem("ultimaRemessaId");
-
-        if (!remessaId) {
-          mostrarMensagem("Nenhuma remessa recente encontrada para apagar.", "warn");
-          return;
-        }
-
-        const volumes = await buscarVolumesPorRemessa(remessaId);
-
-        if (!volumes.length) {
-          mostrarMensagem("Nenhum volume encontrado para essa remessa.", "warn");
-          return;
-        }
-
-        const confirmar = confirm(`Deseja apagar a remessa ${remessaId} com ${volumes.length} volume(s)?`);
-        if (!confirmar) return;
-
-        for (const item of volumes) {
-          await deleteDoc(doc(db, "volumes", item.id));
-        }
-
-        localStorage.removeItem("ultimaRemessaId");
-
-        document.getElementById("notaInternaBox").classList.add("hidden");
-        document.getElementById("etiquetasBox").classList.add("hidden");
-        document.getElementById("notaInterna").innerHTML = "";
-        document.getElementById("listaEtiquetas").innerHTML = "";
-
-        mostrarMensagem("Remessa de teste apagada com sucesso.", "ok");
-      } catch (error) {
-        console.error(error);
-        mostrarMensagem("Erro ao apagar remessa de teste.", "warn");
-      }
-    };
-
-    async function buscarVolumePorCodigo(codigo) {
-      const q = query(collection(db, "volumes"), where("codigo", "==", codigo));
-      const snap = await getDocs(q);
-
-      if (snap.empty) return null;
-      if (snap.docs.length > 1) {
-        throw new Error("Código duplicado encontrado no banco.");
-      }
-
-      const docSnap = snap.docs[0];
-      return { id: docSnap.id, ...docSnap.data() };
-    }
-
-    async function registrarSaida(codigo) {
-      try {
-        const codigoTratado = (codigo || "").trim();
-        if (!codigoTratado) {
-          mostrarMensagem("Informe o código.", "warn");
-          return;
-        }
-
-        const item = await buscarVolumePorCodigo(codigoTratado);
-        if (!item) {
-          mostrarMensagem("Código não encontrado.", "warn");
-          return;
-        }
-
-        if (!validarTransicaoStatus(item.status, "EM TRANSPORTE")) {
-          if (item.status === "ENTREGUE") {
-            mostrarMensagem("Esse volume já foi entregue.", "warn");
-            return;
-          }
-          if (item.status === "EM TRANSPORTE") {
-            mostrarMensagem("Esse volume já teve saída registrada.", "warn");
-            return;
-          }
-          mostrarMensagem("Transição de status inválida.", "warn");
-          return;
-        }
-
-        await updateDoc(doc(db, "volumes", item.id), {
-          status: "EM TRANSPORTE",
-          saidaEm: Date.now()
-        });
-
-        document.getElementById("codigoSaida").value = "";
-        mostrarMensagem("Saída registrada com sucesso.", "ok");
-      } catch (error) {
-        console.error(error);
-        mostrarMensagem(error.message || "Erro ao registrar saída.", "warn");
-      }
-    }
-
-    async function registrarChegada(codigo) {
-      try {
-        const codigoTratado = (codigo || "").trim();
-        if (!codigoTratado) {
-          mostrarMensagem("Informe o código.", "warn");
-          return;
-        }
-
-        const item = await buscarVolumePorCodigo(codigoTratado);
-        if (!item) {
-          mostrarMensagem("Código não encontrado.", "warn");
-          return;
-        }
-
-        if (!validarTransicaoStatus(item.status, "ENTREGUE")) {
-          if (item.status === "AGUARDANDO") {
-            mostrarMensagem("Esse volume ainda não teve saída.", "warn");
-            return;
-          }
-          if (item.status === "ENTREGUE") {
-            mostrarMensagem("Esse volume já teve chegada registrada.", "warn");
-            return;
-          }
-          mostrarMensagem("Transição de status inválida.", "warn");
-          return;
-        }
-
-        const agora = Date.now();
-        const saidaEm = item.saidaEm || agora;
-        const tempoMin = Math.round((agora - saidaEm) / 60000);
-
-        await updateDoc(doc(db, "volumes", item.id), {
-          status: "ENTREGUE",
-          chegadaEm: agora,
-          tempoMin
-        });
-
-        document.getElementById("codigoChegada").value = "";
-        mostrarMensagem("Chegada registrada com sucesso.", "ok");
-      } catch (error) {
-        console.error(error);
-        mostrarMensagem(error.message || "Erro ao registrar chegada.", "warn");
-      }
-    }
-
-    window.registrarSaidaManual = function () {
-      const codigo = document.getElementById("codigoSaida").value;
-      registrarSaida(codigo);
-    };
-
-    window.registrarChegadaManual = function () {
-      const codigo = document.getElementById("codigoChegada").value;
-      registrarChegada(codigo);
-    };
-
-    window.iniciarLeitorSaida = async function () {
-      try {
-        await pararLeitorSaida();
-
-        html5QrSaida = new Html5Qrcode("readerSaida");
-
-        await html5QrSaida.start(
-          { facingMode: "environment" },
-          { fps: 12, qrbox: 240 },
-          async (decodedText) => {
-            const agora = Date.now();
-
-            if (decodedText === ultimoQrLidoSaida && (agora - ultimaLeituraSaida) < 3000) {
-              return;
+
+            </section>    <!-- MODAL DETALHES DO VOLUME -->
+
+    <div
+        id="modalDetalhesVolume"
+        class="modal hidden">
+
+        <div class="modal-content modal-large">
+
+            <div class="modal-header">
+
+                <h3>Detalhes do Volume</h3>
+
+                <button
+                    id="fecharModalDetalhes"
+                    class="modal-close">
+                    ×
+                </button>
+
+            </div>
+
+            <div id="detalhesVolumeContainer">
+
+                <div class="details-grid">
+
+                    <div class="detail-card">
+                        <span>Código</span>
+                        <strong id="detCodigo">-</strong>
+                    </div>
+
+                    <div class="detail-card">
+                        <span>Remessa</span>
+                        <strong id="detRemessa">-</strong>
+                    </div>
+
+                    <div class="detail-card">
+                        <span>Status</span>
+                        <strong id="detStatus">-</strong>
+                    </div>
+
+                    <div class="detail-card">
+                        <span>Volume</span>
+                        <strong id="detVolume">-</strong>
+                    </div>
+
+                </div>
+
+                <div class="card">
+
+                    <h4>Informações Gerais</h4>
+
+                    <div class="info-grid">
+
+                        <div>
+                            <label>Origem</label>
+                            <p id="detOrigem">-</p>
+                        </div>
+
+                        <div>
+                            <label>Destino</label>
+                            <p id="detDestino">-</p>
+                        </div>
+
+                        <div>
+                            <label>Cidade</label>
+                            <p id="detCidade">-</p>
+                        </div>
+
+                        <div>
+                            <label>Material</label>
+                            <p id="detMaterial">-</p>
+                        </div>
+
+                        <div>
+                            <label>Responsável</label>
+                            <p id="detResponsavel">-</p>
+                        </div>
+
+                        <div>
+                            <label>Data de Criação</label>
+                            <p id="detCriadoEm">-</p>
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <div class="card">
+
+                    <h4>Movimentações</h4>
+
+                    <div id="timelineMovimentacoes">
+
+                    </div>
+
+                </div>
+
+                <div
+                    id="blocoDescarteDetalhes"
+                    class="card hidden">
+
+                    <h4>Informações de Descarte</h4>
+
+                    <div class="info-grid">
+
+                        <div>
+                            <label>Motivo</label>
+                            <p id="detMotivoDescarte">-</p>
+                        </div>
+
+                        <div>
+                            <label>Funcionário</label>
+                            <p id="detFuncionarioDescarte">-</p>
+                        </div>
+
+                        <div>
+                            <label>Data</label>
+                            <p id="detDataDescarte">-</p>
+                        </div>
+
+                    </div>
+
+                    <div class="descarte-image-box">
+
+                        <img
+                            id="detImagemDescarte"
+                            src=""
+                            alt="Foto descarte">
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- MODAL ETIQUETAS -->
+
+    <div
+        id="modalEtiquetas"
+        class="modal hidden">
+
+        <div class="modal-content modal-xl">
+
+            <div class="modal-header">
+
+                <h3>Etiquetas da Remessa</h3>
+
+                <button
+                    id="fecharModalEtiquetas"
+                    class="modal-close">
+                    ×
+                </button>
+
+            </div>
+
+            <div class="actions-row">
+
+                <button
+                    id="btnExportarEtiquetasPdf"
+                    class="btn btn-primary">
+                    Exportar PDF
+                </button>
+
+                <button
+                    id="btnImprimirEtiquetas"
+                    class="btn btn-secondary">
+                    Imprimir
+                </button>
+
+            </div>
+
+            <div
+                id="listaEtiquetas"
+                class="etiquetas-grid">
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- MODAL CONFIRMAÇÃO -->
+
+    <div
+        id="modalConfirmacao"
+        class="modal hidden">
+
+        <div class="modal-content modal-small">
+
+            <div class="modal-header">
+
+                <h3>Confirmação</h3>
+
+            </div>
+
+            <div class="modal-body">
+
+                <p id="textoConfirmacao"></p>
+
+            </div>
+
+            <div class="actions-row">
+
+                <button
+                    id="btnCancelarConfirmacao"
+                    class="btn btn-secondary">
+                    Cancelar
+                </button>
+
+                <button
+                    id="btnConfirmarAcao"
+                    class="btn btn-danger">
+                    Confirmar
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- TEMPLATES -->
+
+    <template id="templateEtiqueta">
+
+        <div class="etiqueta-card">
+
+            <div class="etiqueta-header">
+
+                <strong class="etiqueta-remessa"></strong>
+
+            </div>
+
+            <div class="etiqueta-body">
+
+                <p class="etiqueta-volume"></p>
+
+                <p class="etiqueta-origem"></p>
+
+                <p class="etiqueta-destino"></p>
+
+                <p class="etiqueta-material"></p>
+
+                <div class="etiqueta-qr"></div>
+
+            </div>
+
+        </div>
+
+    </template>
+
+    <template id="templateTimeline">
+
+        <div class="timeline-item">
+
+            <div class="timeline-dot"></div>
+
+            <div class="timeline-content">
+
+                <strong class="timeline-titulo"></strong>
+
+                <p class="timeline-descricao"></p>
+
+                <small class="timeline-data"></small>
+
+            </div>
+
+        </div>
+
+    </template>
+
+    <!-- CONFIG -->
+
+    <script>
+
+        window.APP_CONFIG = {
+
+            appName: "Sistema Hospitalar",
+
+            version: "2.0.0",
+
+            statusVolume: {
+                AGUARDANDO: "AGUARDANDO",
+                EM_TRANSPORTE: "EM_TRANSPORTE",
+                ENTREGUE: "ENTREGUE",
+                DESCARTADO: "DESCARTADO"
+            },
+
+            perfis: {
+                ADMIN: "admin",
+                SAIDA: "saida",
+                CHEGADA: "chegada",
+                DESCARTE: "descarte"
             }
 
-            ultimoQrLidoSaida = decodedText;
-            ultimaLeituraSaida = agora;
+        };
 
-            document.getElementById("codigoSaida").value = decodedText;
-            await pararLeitorSaida();
-            await registrarSaida(decodedText);
-          },
-          () => {}
-        );
+    </script>
 
-        mostrarMensagem("Leitor de saída iniciado.", "info");
-      } catch (error) {
-        console.error(error);
-        mostrarMensagem("Não foi possível iniciar a câmera para saída.", "warn");
-      }
-    };
+    <!-- FIREBASE -->
 
-    window.iniciarLeitorChegada = async function () {
-      try {
-        await pararLeitorChegada();
+    <script type="module" src="js/firebase.js"></script>
 
-        html5QrChegada = new Html5Qrcode("readerChegada");
+    <!-- CORE -->
 
-        await html5QrChegada.start(
-          { facingMode: "environment" },
-          { fps: 12, qrbox: 240 },
-          async (decodedText) => {
-            const agora = Date.now();
+    <script type="module" src="js/utils.js"></script>
 
-            if (decodedText === ultimoQrLidoChegada && (agora - ultimaLeituraChegada) < 3000) {
-              return;
+    <script type="module" src="js/auth.js"></script>
+
+    <script type="module" src="js/dashboard.js"></script>
+
+    <script type="module" src="js/admin.js"></script>
+
+    <script type="module" src="js/remessas.js"></script>
+
+    <script type="module" src="js/saida.js"></script>
+
+    <script type="module" src="js/chegada.js"></script>
+
+    <script type="module" src="js/descarte.js"></script>
+
+    <script type="module" src="js/auditoria.js"></script>
+
+    <script type="module" src="js/relatorios.js"></script>
+
+    <!-- APP -->
+
+    <script type="module">
+
+        import { iniciarAplicacao } from "./js/auth.js";
+
+        document.addEventListener(
+            "DOMContentLoaded",
+            async () => {
+
+                try {
+
+                    await iniciarAplicacao();
+
+                    document
+                        .getElementById("loadingScreen")
+                        .classList
+                        .add("hidden");
+
+                } catch (erro) {
+
+                    console.error(erro);
+
+                    document
+                        .getElementById("loadingScreen")
+                        .classList
+                        .add("hidden");
+
+                    alert(
+                        "Erro ao iniciar sistema."
+                    );
+
+                }
+
             }
-
-            ultimoQrLidoChegada = decodedText;
-            ultimaLeituraChegada = agora;
-
-            document.getElementById("codigoChegada").value = decodedText;
-            await pararLeitorChegada();
-            await registrarChegada(decodedText);
-          },
-          () => {}
         );
 
-        mostrarMensagem("Leitor de chegada iniciado.", "info");
-      } catch (error) {
-        console.error(error);
-        mostrarMensagem("Não foi possível iniciar a câmera para chegada.", "warn");
-      }
-    };
+    </script>
 
-    window.pararLeitorSaida = async function () {
-      try {
-        if (html5QrSaida) {
-          await html5QrSaida.stop();
-          await html5QrSaida.clear();
-          html5QrSaida = null;
-        }
-      } catch (error) {
-        console.warn("Erro ao parar leitor de saída:", error);
-      }
-    };
-
-    window.pararLeitorChegada = async function () {
-      try {
-        if (html5QrChegada) {
-          await html5QrChegada.stop();
-          await html5QrChegada.clear();
-          html5QrChegada = null;
-        }
-      } catch (error) {
-        console.warn("Erro ao parar leitor de chegada:", error);
-      }
-    };
-
-    function obterRemessasUnicas(lista) {
-      const mapa = new Map();
-
-      lista.forEach(item => {
-        if (!mapa.has(item.remessaId)) {
-          mapa.set(item.remessaId, {
-            remessaId: item.remessaId,
-            origem: item.origem,
-            destino: item.destino,
-            cidade: item.cidade,
-            material: item.material,
-            responsavel: item.responsavel,
-            quantidadeVolumes: item.quantidadeVolumes,
-            criadoEm: item.criadoEm
-          });
-        }
-      });
-
-      return [...mapa.values()].sort((a, b) => (b.criadoEm || 0) - (a.criadoEm || 0));
-    }
-
-    async function carregarFiltroRemessas() {
-      const select = document.getElementById("filtroRemessa");
-      const valorAtual = select.value;
-
-      const remessas = obterRemessasUnicas(todosVolumes);
-
-      select.innerHTML = `<option value="">Última remessa</option>`;
-
-      remessas.forEach(r => {
-        const option = document.createElement("option");
-        option.value = r.remessaId;
-        option.textContent = `${r.remessaId} - ${r.origem} → ${r.destino}`;
-        select.appendChild(option);
-      });
-
-      if ([...select.options].some(op => op.value === valorAtual)) {
-        select.value = valorAtual;
-      }
-    }
-
-    function getListaPainelFiltrada() {
-      let lista = [...todosVolumes];
-
-      if (!lista.length) return [];
-
-      const remessaSelecionada = document.getElementById("filtroRemessa").value;
-      const busca = document.getElementById("buscaCodigo").value.trim().toLowerCase();
-
-      if (remessaSelecionada) {
-        lista = lista.filter(v => v.remessaId === remessaSelecionada);
-      } else {
-        const ultimaRemessaId = [...lista].sort((a, b) => (b.criadoEm || 0) - (a.criadoEm || 0))[0]?.remessaId;
-        lista = lista.filter(v => v.remessaId === ultimaRemessaId);
-      }
-
-      if (busca) {
-        lista = lista.filter(v => (v.codigo || "").toLowerCase().includes(busca));
-      }
-
-      return lista.sort((a, b) => (a.volumeNumero || 0) - (b.volumeNumero || 0));
-    }
-
-    function atualizarPainel() {
-      const tabela = document.getElementById("tabelaStatus");
-      tabela.innerHTML = "";
-
-      if (!todosVolumes.length) {
-        tabela.innerHTML = `<tr><td colspan="8">Nenhum volume encontrado.</td></tr>`;
-        document.getElementById("resumoRemessa").textContent = "-";
-        document.getElementById("resumoTotal").textContent = "0";
-        document.getElementById("resumoSaida").textContent = "0";
-        document.getElementById("resumoChegada").textContent = "0";
-        document.getElementById("resumoPendentes").textContent = "0";
-        document.getElementById("resumoTempo").textContent = "-";
-        document.getElementById("alertaPainel").className = "alerta info";
-        document.getElementById("alertaPainel").textContent = "Nenhuma remessa cadastrada até o momento.";
-        return;
-      }
-
-      const remessaAtual = getListaPainelFiltrada();
-
-      if (!remessaAtual.length) {
-        tabela.innerHTML = `<tr><td colspan="8">Nenhum volume encontrado para o filtro informado.</td></tr>`;
-        document.getElementById("resumoRemessa").textContent = "-";
-        document.getElementById("resumoTotal").textContent = "0";
-        document.getElementById("resumoSaida").textContent = "0";
-        document.getElementById("resumoChegada").textContent = "0";
-        document.getElementById("resumoPendentes").textContent = "0";
-        document.getElementById("resumoTempo").textContent = "-";
-        document.getElementById("alertaPainel").className = "alerta info";
-        document.getElementById("alertaPainel").textContent = "Nenhum item corresponde ao filtro atual.";
-        return;
-      }
-
-      const remessaId = remessaAtual[0].remessaId;
-      const total = remessaAtual.length;
-      const comSaida = remessaAtual.filter(v => v.status === "EM TRANSPORTE" || v.status === "ENTREGUE").length;
-      const comChegada = remessaAtual.filter(v => v.status === "ENTREGUE").length;
-      const pendentes = total - comChegada;
-
-      document.getElementById("resumoRemessa").textContent = remessaId;
-      document.getElementById("resumoTotal").textContent = total;
-      document.getElementById("resumoSaida").textContent = comSaida;
-      document.getElementById("resumoChegada").textContent = comChegada;
-      document.getElementById("resumoPendentes").textContent = pendentes;
-
-      const tempos = remessaAtual.map(v => v.tempoMin).filter(v => typeof v === "number");
-      if (tempos.length) {
-        const media = Math.round(tempos.reduce((a, b) => a + b, 0) / tempos.length);
-        document.getElementById("resumoTempo").textContent = formatarTempo(media);
-      } else {
-        document.getElementById("resumoTempo").textContent = "-";
-      }
-
-      const alerta = document.getElementById("alertaPainel");
-      if (comSaida > comChegada) {
-        alerta.className = "alerta warn";
-        alerta.textContent = `Atenção: ${comSaida} volume(s) tiveram saída, mas apenas ${comChegada} tiveram chegada. Há divergência a regularizar.`;
-      } else if (total > 0 && comChegada === total) {
-        alerta.className = "alerta ok";
-        alerta.textContent = "Todos os volumes desta remessa foram recebidos com sucesso.";
-      } else {
-        alerta.className = "alerta info";
-        alerta.textContent = "Nenhuma divergência encontrada no momento.";
-      }
-
-      remessaAtual.forEach((item) => {
-        const tr = document.createElement("tr");
-        tr.innerHTML = `
-          <td>${item.codigo}<br><span class="mini">${item.volumeEtiqueta || "-"}</span></td>
-          <td><span class="${classeStatus(item.status)}">${item.status}</span></td>
-          <td>${item.origem || "-"}</td>
-          <td>${item.destino || "-"}</td>
-          <td>${item.material || "-"}</td>
-          <td>${formatarData(item.saidaEm)}</td>
-          <td>${formatarData(item.chegadaEm)}</td>
-          <td>${formatarTempo(item.tempoMin)}</td>
-        `;
-        tabela.appendChild(tr);
-      });
-    }
-
-    function renderizarHistorico() {
-      const area = document.getElementById("listaHistorico");
-      area.innerHTML = "";
-
-      const remessas = obterRemessasUnicas(todosVolumes);
-
-      if (!remessas.length) {
-        area.innerHTML = `<div class="sem-dados">Nenhuma remessa cadastrada ainda.</div>`;
-        return;
-      }
-
-      remessas.forEach(remessa => {
-        const volumes = todosVolumes.filter(v => v.remessaId === remessa.remessaId);
-        const total = volumes.length;
-        const entregues = volumes.filter(v => v.status === "ENTREGUE").length;
-        const emTransporte = volumes.filter(v => v.status === "EM TRANSPORTE").length;
-        const aguardando = volumes.filter(v => v.status === "AGUARDANDO").length;
-
-        const div = document.createElement("div");
-        div.className = "historico-item";
-        div.innerHTML = `
-          <strong>${remessa.remessaId}</strong>
-          <div><b>Origem:</b> ${remessa.origem || "-"}</div>
-          <div><b>Destino:</b> ${remessa.destino || "-"}</div>
-          <div><b>Cidade:</b> ${remessa.cidade || "-"}</div>
-          <div><b>Material:</b> ${remessa.material || "-"}</div>
-          <div><b>Responsável:</b> ${remessa.responsavel || "-"}</div>
-          <div><b>Data:</b> ${formatarData(remessa.criadoEm)}</div>
-          <div style="margin-top:8px;">
-            <span class="pill">Total: ${total}</span>
-            <span class="pill">Entregues: ${entregues}</span>
-            <span class="pill">Em transporte: ${emTransporte}</span>
-            <span class="pill">Aguardando: ${aguardando}</span>
-          </div>
-          <div style="margin-top:10px;">
-            <button class="btn3" onclick="selecionarRemessaHistorico('${remessa.remessaId}')">Ver no painel</button>
-          </div>
-        `;
-        area.appendChild(div);
-      });
-    }
-
-    window.selecionarRemessaHistorico = function(remessaId) {
-      document.getElementById("filtroRemessa").value = remessaId;
-      mostrarSecao("painel");
-      atualizarPainel();
-    };
-
-    window.limparFiltrosPainel = function () {
-      document.getElementById("filtroRemessa").value = "";
-      document.getElementById("buscaCodigo").value = "";
-      atualizarPainel();
-    };
-
-    window.exportarEtiquetasPDF = async function () {
-      try {
-        const remessaId = localStorage.getItem("ultimaRemessaId");
-        if (!remessaId) {
-          mostrarMensagem("Nenhuma remessa recente para exportar.", "warn");
-          return;
-        }
-
-        const volumes = await buscarVolumesPorRemessa(remessaId);
-        if (!volumes.length) {
-          mostrarMensagem("Nenhuma etiqueta encontrada para exportação.", "warn");
-          return;
-        }
-
-        const { jsPDF } = window.jspdf;
-        const pdf = new jsPDF("p", "mm", "a4");
-
-        for (let i = 0; i < volumes.length; i++) {
-          const item = volumes[i];
-
-          if (i > 0) pdf.addPage();
-
-          const tempCanvas = document.createElement("canvas");
-          await QRCode.toCanvas(tempCanvas, item.codigo, { width: 220 });
-
-          const qrImage = tempCanvas.toDataURL("image/png");
-
-          pdf.setFontSize(16);
-          pdf.text("Etiqueta de Volume", 15, 20);
-
-          pdf.setFontSize(11);
-          pdf.text(`Remessa: ${item.remessaId}`, 15, 32);
-          pdf.text(`Volume: ${item.volumeEtiqueta}`, 15, 40);
-          pdf.text(`Código: ${item.codigo}`, 15, 48);
-          pdf.text(`Origem: ${item.origem}`, 15, 56);
-          pdf.text(`Destino: ${item.destino}`, 15, 64);
-          pdf.text(`Cidade: ${item.cidade}`, 15, 72);
-          pdf.text(`Material: ${item.material}`, 15, 80);
-
-          pdf.addImage(qrImage, "PNG", 15, 90, 55, 55);
-        }
-
-        pdf.save(`etiquetas-${remessaId}.pdf`);
-        mostrarMensagem("PDF de etiquetas gerado com sucesso.", "ok");
-      } catch (error) {
-        console.error(error);
-        mostrarMensagem("Erro ao exportar etiquetas em PDF.", "warn");
-      }
-    };
-
-    window.exportarRelatorioPDF = async function () {
-      try {
-        const lista = getListaPainelFiltrada();
-
-        if (!lista.length) {
-          mostrarMensagem("Nenhum dado disponível para exportação.", "warn");
-          return;
-        }
-
-        const { jsPDF } = window.jspdf;
-        const pdf = new jsPDF("p", "mm", "a4");
-
-        let y = 15;
-        const remessaId = lista[0].remessaId;
-
-        pdf.setFontSize(16);
-        pdf.text("Relatório de Remessa", 14, y);
-        y += 10;
-
-        pdf.setFontSize(11);
-        pdf.text(`Remessa: ${remessaId}`, 14, y); y += 7;
-        pdf.text(`Gerado em: ${new Date().toLocaleString("pt-BR")}`, 14, y); y += 10;
-
-        lista.forEach((item, index) => {
-          if (y > 270) {
-            pdf.addPage();
-            y = 15;
-          }
-
-          pdf.setFontSize(11);
-          pdf.text(`${index + 1}. ${item.codigo}`, 14, y); y += 6;
-          pdf.setFontSize(10);
-          pdf.text(`Status: ${item.status}`, 18, y); y += 5;
-          pdf.text(`Origem: ${item.origem}`, 18, y); y += 5;
-          pdf.text(`Destino: ${item.destino}`, 18, y); y += 5;
-          pdf.text(`Material: ${item.material || "-"}`, 18, y); y += 5;
-          pdf.text(`Saída: ${formatarData(item.saidaEm)}`, 18, y); y += 5;
-          pdf.text(`Chegada: ${formatarData(item.chegadaEm)}`, 18, y); y += 5;
-          pdf.text(`Tempo: ${formatarTempo(item.tempoMin)}`, 18, y); y += 8;
-
-          pdf.line(14, y, 195, y);
-          y += 6;
-        });
-
-        pdf.save(`relatorio-${remessaId}.pdf`);
-        mostrarMensagem("Relatório PDF gerado com sucesso.", "ok");
-      } catch (error) {
-        console.error(error);
-        mostrarMensagem("Erro ao exportar relatório PDF.", "warn");
-      }
-    };
-
-    document.getElementById("filtroRemessa").addEventListener("change", atualizarPainel);
-    document.getElementById("buscaCodigo").addEventListener("input", atualizarPainel);
-
-    onSnapshot(collection(db, "volumes"), (snap) => {
-      const lista = [];
-
-      snap.forEach((docSnap) => {
-        const d = docSnap.data();
-        if (!d.codigo || !d.status || !d.remessaId) return;
-        lista.push({ id: docSnap.id, ...d });
-      });
-
-      todosVolumes = lista.sort((a, b) => (b.criadoEm || 0) - (a.criadoEm || 0));
-
-      carregarFiltroRemessas();
-      atualizarPainel();
-      renderizarHistorico();
-    }, (error) => {
-      console.error(error);
-      mostrarMensagem("Erro ao sincronizar dados em tempo real.", "warn");
-    });
-  </script>
 </body>
+
 </html>
