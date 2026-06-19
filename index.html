@@ -478,7 +478,7 @@
 <body>
   <div class="topo">
     <h1>Sistema de Rastreamento Hospitalar</h1>
-    <p>Controle interno de remessas, volumes, saÃ­da, chegada, descarte e divergÃªncias</p>
+    <p>Controle interno de remessas, volumes, saída, chegada, descarte e divergências</p>
   </div>
 
   <div class="container">
@@ -488,29 +488,29 @@
       <h2>Login</h2>
       <p class="subtitulo">Acesse conforme seu perfil operacional</p>
 
-      <label for="loginUsuario">UsuÃ¡rio</label>
-      <input id="loginUsuario" placeholder="UsuÃ¡rio" />
+      <label for="loginUsuario">Usuário</label>
+      <input id="loginUsuario" placeholder="Usuário" />
 
       <label for="loginSenha">Senha</label>
       <input id="loginSenha" type="password" placeholder="Senha" />
 
       <button class="btn" onclick="fazerLogin()">Entrar</button>
-      <div id="erroLogin" class="alerta warn hidden">UsuÃ¡rio ou senha invÃ¡lidos.</div>
+      <div id="erroLogin" class="alerta warn hidden">Usuário ou senha inválidos.</div>
     </div>
 
     <div id="appArea" class="hidden">
       <div class="card">
         <div class="menu-info">
           <div>
-            <strong>UsuÃ¡rio:</strong> <span id="usuarioLogadoTexto"></span><br>
+            <strong>Usuário:</strong> <span id="usuarioLogadoTexto"></span><br>
             <span class="mini"><strong>Perfil:</strong> <span id="perfilLogadoTexto"></span></span>
           </div>
 
           <div class="top-actions">
             <button class="btn3" onclick="mostrarSecao('painel')">Painel</button>
-            <button class="btn3" onclick="mostrarSecao('historico')">HistÃ³rico</button>
+            <button class="btn3" onclick="mostrarSecao('historico')">Histórico</button>
             <button class="btn3" onclick="mostrarSecao('admin')">Admin</button>
-            <button class="btn3" onclick="mostrarSecao('saida')">SaÃ­da</button>
+            <button class="btn3" onclick="mostrarSecao('saida')">Saída</button>
             <button class="btn3" onclick="mostrarSecao('chegada')">Chegada</button>
             <button class="btn3" onclick="mostrarSecao('descarte')">Descarte</button>
             <button class="btn-danger" onclick="logout()">Sair</button>
@@ -527,26 +527,26 @@
           <div><label>Destino</label><input id="destino" placeholder="Ex: Central de Tratamento" /></div>
           <div><label>Cidade</label><input id="cidade" placeholder="Ex: Ariquemes - RO" /></div>
           <div><label>Material</label><input id="material" placeholder="Ex: Seringas" /></div>
-          <div><label>ResponsÃ¡vel</label><input id="responsavel" placeholder="Ex: Setor interno" /></div>
+          <div><label>Responsável</label><input id="responsavel" placeholder="Ex: Setor interno" /></div>
           <div><label>Quantidade de volumes</label><input id="quantidade" type="number" min="1" placeholder="Ex: 6" /></div>
         </div>
 
         <div class="linha-auto">
           <button class="btn" onclick="criarRemessa()">Criar remessa</button>
           <button class="btn3" onclick="carregarEtiquetasUltimaRemessa()">Recarregar etiquetas</button>
-          <button class="btn-danger" onclick="apagarUltimaRemessaTeste()">Apagar Ãºltima remessa de teste</button>
+          <button class="btn-danger" onclick="apagarUltimaRemessaTeste()">Apagar última remessa de teste</button>
         </div>
 
         <div class="opcoes-etiqueta">
-          <h3>ImpressÃ£o de etiquetas</h3>
-          <p class="subtitulo">A etiqueta de transporte nÃ£o mostra o conteÃºdo. O conteÃºdo sai em etiqueta separada.</p>
+          <h3>Impressão de etiquetas</h3>
+          <p class="subtitulo">A etiqueta de transporte não mostra o conteúdo. O conteúdo sai em etiqueta separada.</p>
 
           <div class="grid">
             <div>
               <label>Tipo de etiqueta</label>
               <select id="tipoEtiqueta">
                 <option value="transporte">Transporte</option>
-                <option value="conteudo">ConteÃºdo</option>
+                <option value="conteudo">Conteúdo</option>
                 <option value="ambas">Ambas</option>
               </select>
             </div>
@@ -555,9 +555,9 @@
               <label>Tamanho / formato</label>
               <select id="tamanhoEtiqueta">
                 <option value="50x30">Pequena 50x30mm</option>
-                <option value="70x40" selected>MÃ©dia 70x40mm</option>
+                <option value="70x40" selected>Média 70x40mm</option>
                 <option value="100x50">Grande 100x50mm</option>
-                <option value="a4">Folha A4 com vÃ¡rias etiquetas</option>
+                <option value="a4">Folha A4 com várias etiquetas</option>
               </select>
             </div>
           </div>
@@ -579,16 +579,16 @@
         <div id="areaImpressao" class="hidden"></div>
 
         <div class="card" style="margin-top:14px; background:#f8fafc;">
-          <h3>UsuÃ¡rios do sistema</h3>
-          <p class="subtitulo">UsuÃ¡rios ficam salvos neste navegador pelo localStorage.</p>
+          <h3>Usuários do sistema</h3>
+          <p class="subtitulo">Usuários ficam salvos neste navegador pelo localStorage.</p>
 
           <div class="grid">
-            <div><label>Novo usuÃ¡rio</label><input id="novoUsuario" placeholder="Ex: maria.saida" /></div>
+            <div><label>Novo usuário</label><input id="novoUsuario" placeholder="Ex: maria.saida" /></div>
             <div><label>Senha</label><input id="novaSenha" placeholder="Ex: 1234" /></div>
             <div>
               <label>Perfil</label>
               <select id="novoPerfil">
-                <option value="saida">SaÃ­da</option>
+                <option value="saida">Saída</option>
                 <option value="chegada">Chegada</option>
                 <option value="descarte">Descarte</option>
                 <option value="admin">Admin</option>
@@ -596,16 +596,16 @@
             </div>
           </div>
 
-          <button class="btn" onclick="cadastrarUsuarioLocal()">Cadastrar usuÃ¡rio</button>
+          <button class="btn" onclick="cadastrarUsuarioLocal()">Cadastrar usuário</button>
           <button class="btn3" onclick="renderizarUsuariosLocais()">Atualizar lista</button>
 
           <div class="table-wrap" style="margin-top:12px;">
             <table>
               <thead>
                 <tr>
-                  <th>UsuÃ¡rio</th>
+                  <th>Usuário</th>
                   <th>Perfil</th>
-                  <th>AÃ§Ã£o</th>
+                  <th>Ação</th>
                 </tr>
               </thead>
               <tbody id="tabelaUsuarios"></tbody>
@@ -615,15 +615,15 @@
       </div>
 
       <div id="secaoSaida" class="card hidden">
-        <h2>Registrar saÃ­da</h2>
-        <p class="subtitulo">Informe manualmente ou use a cÃ¢mera para leitura do QR Code</p>
+        <h2>Registrar saída</h2>
+        <p class="subtitulo">Informe manualmente ou use a câmera para leitura do QR Code</p>
 
-        <label for="codigoSaida">CÃ³digo manual</label>
-        <input id="codigoSaida" placeholder="CÃ³digo manual" />
+        <label for="codigoSaida">Código manual</label>
+        <input id="codigoSaida" placeholder="Código manual" />
 
         <div class="linha-auto">
-          <button class="btn" onclick="registrarSaidaManual()">Registrar saÃ­da manual</button>
-          <button class="btn2" onclick="iniciarLeitorSaida()">Ler QR pela cÃ¢mera</button>
+          <button class="btn" onclick="registrarSaidaManual()">Registrar saída manual</button>
+          <button class="btn2" onclick="iniciarLeitorSaida()">Ler QR pela câmera</button>
           <button class="btn3" onclick="pararLeitorSaida()">Parar leitor</button>
         </div>
 
@@ -634,12 +634,12 @@
         <h2>Registrar chegada</h2>
         <p class="subtitulo">Finalize o volume recebido manualmente ou por leitura de QR</p>
 
-        <label for="codigoChegada">CÃ³digo manual</label>
-        <input id="codigoChegada" placeholder="CÃ³digo manual" />
+        <label for="codigoChegada">Código manual</label>
+        <input id="codigoChegada" placeholder="Código manual" />
 
         <div class="linha-auto">
           <button class="btn" onclick="registrarChegadaManual()">Registrar chegada manual</button>
-          <button class="btn2" onclick="iniciarLeitorChegada()">Ler QR pela cÃ¢mera</button>
+          <button class="btn2" onclick="iniciarLeitorChegada()">Ler QR pela câmera</button>
           <button class="btn3" onclick="pararLeitorChegada()">Parar leitor</button>
         </div>
 
@@ -648,14 +648,14 @@
 
       <div id="secaoDescarte" class="card hidden">
         <h2>Registrar descarte</h2>
-        <p class="subtitulo">O descarte sÃ³ Ã© permitido para volume que jÃ¡ chegou.</p>
+        <p class="subtitulo">O descarte só é permitido para volume que já chegou.</p>
 
-        <label for="codigoDescarte">CÃ³digo manual</label>
-        <input id="codigoDescarte" placeholder="CÃ³digo manual" />
+        <label for="codigoDescarte">Código manual</label>
+        <input id="codigoDescarte" placeholder="Código manual" />
 
         <div class="linha-auto">
           <button class="btn" onclick="registrarDescarteManual()">Registrar descarte manual</button>
-          <button class="btn2" onclick="iniciarLeitorDescarte()">Ler QR pela cÃ¢mera</button>
+          <button class="btn2" onclick="iniciarLeitorDescarte()">Ler QR pela câmera</button>
           <button class="btn3" onclick="pararLeitorDescarte()">Parar leitor</button>
         </div>
 
@@ -664,7 +664,7 @@
 
       <div id="secaoPainel" class="card">
         <h2>Painel em tempo real</h2>
-        <p class="subtitulo">Acompanhe status, filtros e divergÃªncias da remessa</p>
+        <p class="subtitulo">Acompanhe status, filtros e divergências da remessa</p>
 
         <div class="toolbar">
           <div>
@@ -673,39 +673,39 @@
           </div>
 
           <div>
-            <label>Buscar por cÃ³digo</label>
+            <label>Buscar por código</label>
             <input id="buscaCodigo" placeholder="Ex: REM-xxxx-VOL-01" />
           </div>
 
           <div class="acoes">
             <label>&nbsp;</label>
             <button class="btn3" onclick="limparFiltrosPainel()">Limpar filtros</button>
-            <button class="btn2" onclick="exportarRelatorioPDF()">Exportar relatÃ³rio PDF</button>
+            <button class="btn2" onclick="exportarRelatorioPDF()">Exportar relatório PDF</button>
           </div>
         </div>
 
         <div class="status-boxes">
           <div class="status-box"><strong>Remessa atual</strong><span id="resumoRemessa">-</span></div>
           <div class="status-box"><strong>Volumes totais</strong><span id="resumoTotal">0</span></div>
-          <div class="status-box"><strong>Com saÃ­da</strong><span id="resumoSaida">0</span></div>
+          <div class="status-box"><strong>Com saída</strong><span id="resumoSaida">0</span></div>
           <div class="status-box"><strong>Com chegada</strong><span id="resumoChegada">0</span></div>
           <div class="status-box"><strong>Descartados</strong><span id="resumoDescarte">0</span></div>
           <div class="status-box"><strong>Pendentes</strong><span id="resumoPendentes">0</span></div>
-          <div class="status-box"><strong>Tempo mÃ©dio</strong><span id="resumoTempo">-</span></div>
+          <div class="status-box"><strong>Tempo médio</strong><span id="resumoTempo">-</span></div>
         </div>
 
-        <div id="alertaPainel" class="alerta ok">Nenhuma divergÃªncia encontrada.</div>
+        <div id="alertaPainel" class="alerta ok">Nenhuma divergência encontrada.</div>
 
         <div class="table-wrap">
           <table>
             <thead>
               <tr>
-                <th>CÃ³digo</th>
+                <th>Código</th>
                 <th>Status</th>
                 <th>Origem</th>
                 <th>Destino</th>
                 <th>Material</th>
-                <th>SaÃ­da</th>
+                <th>Saída</th>
                 <th>Chegada</th>
                 <th>Descarte</th>
                 <th>Tempo</th>
@@ -717,8 +717,8 @@
       </div>
 
       <div id="secaoHistorico" class="card hidden">
-        <h2>HistÃ³rico de remessas</h2>
-        <p class="subtitulo">Visualize rapidamente remessas jÃ¡ criadas no sistema</p>
+        <h2>Histórico de remessas</h2>
+        <p class="subtitulo">Visualize rapidamente remessas já criadas no sistema</p>
         <div id="listaHistorico" class="historico-lista"></div>
       </div>
     </div>
@@ -865,10 +865,10 @@
           </div>
 
           <div class="conteudo-box">
-            <h3>CONTEÃšDO</h3>
+            <h3>CONTEÚDO</h3>
             <div class="conteudo-grande">${textoCurto(item.material, 60)}</div>
             <div class="etiqueta-linha">
-              <b>ResponsÃ¡vel</b>
+              <b>Responsável</b>
               ${textoCurto(item.responsavel, 42)}
             </div>
             <div class="etiqueta-linha">
@@ -970,7 +970,7 @@
       document.getElementById("loginCard").classList.remove("hidden");
       document.getElementById("loginUsuario").value = "";
       document.getElementById("loginSenha").value = "";
-      mostrarMensagem("SessÃ£o encerrada.", "info");
+      mostrarMensagem("Sessão encerrada.", "info");
     };
 
     window.mostrarSecao = function (secao) {
@@ -1004,7 +1004,7 @@
 
       if (secao === "saida") {
         if (!(usuarioAtual?.perfil === "saida" || usuarioAtual?.perfil === "admin")) {
-          mostrarMensagem("Acesso nÃ£o permitido para este perfil.", "warn");
+          mostrarMensagem("Acesso não permitido para este perfil.", "warn");
           return;
         }
         document.getElementById("secaoSaida").classList.remove("hidden");
@@ -1013,7 +1013,7 @@
 
       if (secao === "chegada") {
         if (!(usuarioAtual?.perfil === "chegada" || usuarioAtual?.perfil === "admin")) {
-          mostrarMensagem("Acesso nÃ£o permitido para este perfil.", "warn");
+          mostrarMensagem("Acesso não permitido para este perfil.", "warn");
           return;
         }
         document.getElementById("secaoChegada").classList.remove("hidden");
@@ -1022,7 +1022,7 @@
 
       if (secao === "descarte") {
         if (!(usuarioAtual?.perfil === "descarte" || usuarioAtual?.perfil === "admin")) {
-          mostrarMensagem("Acesso nÃ£o permitido para este perfil.", "warn");
+          mostrarMensagem("Acesso não permitido para este perfil.", "warn");
           return;
         }
         document.getElementById("secaoDescarte").classList.remove("hidden");
@@ -1035,12 +1035,12 @@
       const perfil = document.getElementById("novoPerfil").value;
 
       if (!usuario || !senha || !perfil) {
-        mostrarMensagem("Preencha usuÃ¡rio, senha e perfil.", "warn");
+        mostrarMensagem("Preencha usuário, senha e perfil.", "warn");
         return;
       }
 
       if (usuario.includes(" ")) {
-        mostrarMensagem("O usuÃ¡rio nÃ£o pode ter espaÃ§o. Use ponto, exemplo: maria.saida", "warn");
+        mostrarMensagem("O usuário não pode ter espaço. Use ponto, exemplo: maria.saida", "warn");
         return;
       }
 
@@ -1052,16 +1052,16 @@
       document.getElementById("novaSenha").value = "";
 
       renderizarUsuariosLocais();
-      mostrarMensagem("UsuÃ¡rio cadastrado neste navegador.", "ok");
+      mostrarMensagem("Usuário cadastrado neste navegador.", "ok");
     };
 
     window.removerUsuarioLocal = function (usuario) {
       if (usuariosPadrao[usuario]) {
-        mostrarMensagem("UsuÃ¡rio padrÃ£o nÃ£o pode ser removido pelo sistema.", "warn");
+        mostrarMensagem("Usuário padrão não pode ser removido pelo sistema.", "warn");
         return;
       }
 
-      const confirmar = confirm(`Remover o usuÃ¡rio ${usuario}?`);
+      const confirmar = confirm(`Remover o usuário ${usuario}?`);
       if (!confirmar) return;
 
       const extras = JSON.parse(localStorage.getItem("usuariosSistema") || "{}");
@@ -1069,7 +1069,7 @@
       salvarUsuariosExtras(extras);
 
       renderizarUsuariosLocais();
-      mostrarMensagem("UsuÃ¡rio removido.", "ok");
+      mostrarMensagem("Usuário removido.", "ok");
     };
 
     window.renderizarUsuariosLocais = function () {
@@ -1087,7 +1087,7 @@
           <td>${usuario}</td>
           <td>${dados.perfil}</td>
           <td>
-            ${removivel ? `<button class="btn-danger" onclick="removerUsuarioLocal('${usuario}')">Remover</button>` : `<span class="mini">PadrÃ£o</span>`}
+            ${removivel ? `<button class="btn-danger" onclick="removerUsuarioLocal('${usuario}')">Remover</button>` : `<span class="mini">Padrão</span>`}
           </td>
         `;
         tabela.appendChild(tr);
@@ -1167,7 +1167,7 @@
 
         const docs = await buscarVolumesPorRemessa(remessaId);
         if (!docs.length) {
-          mostrarMensagem("Nenhuma etiqueta encontrada para a Ãºltima remessa.", "info");
+          mostrarMensagem("Nenhuma etiqueta encontrada para a última remessa.", "info");
           return;
         }
 
@@ -1183,7 +1183,7 @@
           <strong>Cidade:</strong> ${primeiro.cidade}<br>
           <strong>Material:</strong> ${primeiro.material}<br>
           <strong>Volumes:</strong> ${primeiro.quantidadeVolumes}<br>
-          <strong>ResponsÃ¡vel:</strong> ${primeiro.responsavel}<br>
+          <strong>Responsável:</strong> ${primeiro.responsavel}<br>
           <strong>Tipo:</strong> Transporte interno sem frete
         `;
 
@@ -1247,7 +1247,7 @@
 
       if (snap.empty) return null;
       if (snap.docs.length > 1) {
-        throw new Error("CÃ³digo duplicado encontrado no banco.");
+        throw new Error("Código duplicado encontrado no banco.");
       }
 
       const docSnap = snap.docs[0];
@@ -1258,26 +1258,26 @@
       try {
         const codigoTratado = (codigo || "").trim();
         if (!codigoTratado) {
-          mostrarMensagem("Informe o cÃ³digo.", "warn");
+          mostrarMensagem("Informe o código.", "warn");
           return;
         }
 
         const item = await buscarVolumePorCodigo(codigoTratado);
         if (!item) {
-          mostrarMensagem("CÃ³digo nÃ£o encontrado.", "warn");
+          mostrarMensagem("Código não encontrado.", "warn");
           return;
         }
 
         if (!validarTransicaoStatus(item.status, "EM TRANSPORTE")) {
           if (item.status === "ENTREGUE" || item.status === "DESCARTADO") {
-            mostrarMensagem("Esse volume jÃ¡ passou da etapa de saÃ­da.", "warn");
+            mostrarMensagem("Esse volume já passou da etapa de saída.", "warn");
             return;
           }
           if (item.status === "EM TRANSPORTE") {
-            mostrarMensagem("Esse volume jÃ¡ teve saÃ­da registrada.", "warn");
+            mostrarMensagem("Esse volume já teve saída registrada.", "warn");
             return;
           }
-          mostrarMensagem("TransiÃ§Ã£o de status invÃ¡lida.", "warn");
+          mostrarMensagem("Transição de status inválida.", "warn");
           return;
         }
 
@@ -1287,10 +1287,10 @@
         });
 
         document.getElementById("codigoSaida").value = "";
-        mostrarMensagem("SaÃ­da registrada com sucesso.", "ok");
+        mostrarMensagem("Saída registrada com sucesso.", "ok");
       } catch (error) {
         console.error(error);
-        mostrarMensagem(error.message || "Erro ao registrar saÃ­da.", "warn");
+        mostrarMensagem(error.message || "Erro ao registrar saída.", "warn");
       }
     }
 
@@ -1298,26 +1298,26 @@
       try {
         const codigoTratado = (codigo || "").trim();
         if (!codigoTratado) {
-          mostrarMensagem("Informe o cÃ³digo.", "warn");
+          mostrarMensagem("Informe o código.", "warn");
           return;
         }
 
         const item = await buscarVolumePorCodigo(codigoTratado);
         if (!item) {
-          mostrarMensagem("CÃ³digo nÃ£o encontrado.", "warn");
+          mostrarMensagem("Código não encontrado.", "warn");
           return;
         }
 
         if (!validarTransicaoStatus(item.status, "ENTREGUE")) {
           if (item.status === "AGUARDANDO") {
-            mostrarMensagem("Esse volume ainda nÃ£o teve saÃ­da.", "warn");
+            mostrarMensagem("Esse volume ainda não teve saída.", "warn");
             return;
           }
           if (item.status === "ENTREGUE" || item.status === "DESCARTADO") {
-            mostrarMensagem("Esse volume jÃ¡ teve chegada registrada.", "warn");
+            mostrarMensagem("Esse volume já teve chegada registrada.", "warn");
             return;
           }
-          mostrarMensagem("TransiÃ§Ã£o de status invÃ¡lida.", "warn");
+          mostrarMensagem("Transição de status inválida.", "warn");
           return;
         }
 
@@ -1343,30 +1343,30 @@
       try {
         const codigoTratado = (codigo || "").trim();
         if (!codigoTratado) {
-          mostrarMensagem("Informe o cÃ³digo.", "warn");
+          mostrarMensagem("Informe o código.", "warn");
           return;
         }
 
         const item = await buscarVolumePorCodigo(codigoTratado);
         if (!item) {
-          mostrarMensagem("CÃ³digo nÃ£o encontrado.", "warn");
+          mostrarMensagem("Código não encontrado.", "warn");
           return;
         }
 
         if (!validarTransicaoStatus(item.status, "DESCARTADO")) {
           if (item.status === "AGUARDANDO") {
-            mostrarMensagem("Esse volume ainda nÃ£o teve saÃ­da nem chegada.", "warn");
+            mostrarMensagem("Esse volume ainda não teve saída nem chegada.", "warn");
             return;
           }
           if (item.status === "EM TRANSPORTE") {
-            mostrarMensagem("Esse volume ainda nÃ£o teve chegada.", "warn");
+            mostrarMensagem("Esse volume ainda não teve chegada.", "warn");
             return;
           }
           if (item.status === "DESCARTADO") {
-            mostrarMensagem("Esse volume jÃ¡ foi descartado.", "warn");
+            mostrarMensagem("Esse volume já foi descartado.", "warn");
             return;
           }
-          mostrarMensagem("TransiÃ§Ã£o de status invÃ¡lida.", "warn");
+          mostrarMensagem("Transição de status inválida.", "warn");
           return;
         }
 
@@ -1421,10 +1421,10 @@
           () => {}
         );
 
-        mostrarMensagem("Leitor de saÃ­da iniciado.", "info");
+        mostrarMensagem("Leitor de saída iniciado.", "info");
       } catch (error) {
         console.error(error);
-        mostrarMensagem("NÃ£o foi possÃ­vel iniciar a cÃ¢mera para saÃ­da.", "warn");
+        mostrarMensagem("Não foi possível iniciar a câmera para saída.", "warn");
       }
     };
 
@@ -1453,7 +1453,7 @@
         mostrarMensagem("Leitor de chegada iniciado.", "info");
       } catch (error) {
         console.error(error);
-        mostrarMensagem("NÃ£o foi possÃ­vel iniciar a cÃ¢mera para chegada.", "warn");
+        mostrarMensagem("Não foi possível iniciar a câmera para chegada.", "warn");
       }
     };
 
@@ -1482,7 +1482,7 @@
         mostrarMensagem("Leitor de descarte iniciado.", "info");
       } catch (error) {
         console.error(error);
-        mostrarMensagem("NÃ£o foi possÃ­vel iniciar a cÃ¢mera para descarte.", "warn");
+        mostrarMensagem("Não foi possível iniciar a câmera para descarte.", "warn");
       }
     };
 
@@ -1494,7 +1494,7 @@
           html5QrSaida = null;
         }
       } catch (error) {
-        console.warn("Erro ao parar leitor de saÃ­da:", error);
+        console.warn("Erro ao parar leitor de saída:", error);
       }
     };
 
@@ -1549,12 +1549,12 @@
 
       const remessas = obterRemessasUnicas(todosVolumes);
 
-      select.innerHTML = `<option value="">Ãšltima remessa</option>`;
+      select.innerHTML = `<option value="">Última remessa</option>`;
 
       remessas.forEach(r => {
         const option = document.createElement("option");
         option.value = r.remessaId;
-        option.textContent = `${r.remessaId} - ${r.origem} â†’ ${r.destino}`;
+        option.textContent = `${r.remessaId} - ${r.origem} → ${r.destino}`;
         select.appendChild(option);
       });
 
@@ -1603,7 +1603,7 @@
 
       if (!todosVolumes.length) {
         tabela.innerHTML = `<tr><td colspan="9">Nenhum volume encontrado.</td></tr>`;
-        zerarResumo("Nenhuma remessa cadastrada atÃ© o momento.");
+        zerarResumo("Nenhuma remessa cadastrada até o momento.");
         return;
       }
 
@@ -1640,7 +1640,7 @@
       const alerta = document.getElementById("alertaPainel");
       if (comSaida > comChegada) {
         alerta.className = "alerta warn";
-        alerta.textContent = `AtenÃ§Ã£o: ${comSaida} volume(s) tiveram saÃ­da, mas apenas ${comChegada} tiveram chegada. HÃ¡ divergÃªncia a regularizar.`;
+        alerta.textContent = `Atenção: ${comSaida} volume(s) tiveram saída, mas apenas ${comChegada} tiveram chegada. Há divergência a regularizar.`;
       } else if (total > 0 && descartados === total) {
         alerta.className = "alerta ok";
         alerta.textContent = "Todos os volumes desta remessa foram descartados.";
@@ -1649,7 +1649,7 @@
         alerta.textContent = "Todos os volumes desta remessa foram recebidos com sucesso.";
       } else {
         alerta.className = "alerta info";
-        alerta.textContent = "Nenhuma divergÃªncia encontrada no momento.";
+        alerta.textContent = "Nenhuma divergência encontrada no momento.";
       }
 
       remessaAtual.forEach((item) => {
@@ -1696,7 +1696,7 @@
           <div><b>Destino:</b> ${remessa.destino || "-"}</div>
           <div><b>Cidade:</b> ${remessa.cidade || "-"}</div>
           <div><b>Material:</b> ${remessa.material || "-"}</div>
-          <div><b>ResponsÃ¡vel:</b> ${remessa.responsavel || "-"}</div>
+          <div><b>Responsável:</b> ${remessa.responsavel || "-"}</div>
           <div><b>Data:</b> ${formatarData(remessa.criadoEm)}</div>
           <div style="margin-top:8px;">
             <span class="pill">Total: ${total}</span>
@@ -1736,7 +1736,7 @@
 
         const volumes = await buscarVolumesPorRemessa(remessaId);
         if (!volumes.length) {
-          mostrarMensagem("Nenhuma etiqueta encontrada para impressÃ£o.", "warn");
+          mostrarMensagem("Nenhuma etiqueta encontrada para impressão.", "warn");
           return;
         }
 
@@ -1766,7 +1766,7 @@
 
         const volumes = await buscarVolumesPorRemessa(remessaId);
         if (!volumes.length) {
-          mostrarMensagem("Nenhuma etiqueta encontrada para exportaÃ§Ã£o.", "warn");
+          mostrarMensagem("Nenhuma etiqueta encontrada para exportação.", "warn");
           return;
         }
 
@@ -1851,7 +1851,7 @@
           pdf.line(pos.x + 2, pos.y + 10, pos.x + cfg.w - 2, pos.y + 10);
 
           pdf.setFontSize(cfg.fsTitulo);
-          pdf.text("CONTEÃšDO", pos.x + cfg.w / 2, pos.y + 18, { align: "center" });
+          pdf.text("CONTEÚDO", pos.x + cfg.w / 2, pos.y + 18, { align: "center" });
 
           pdf.setFontSize(cfg.fsTexto + 1);
           const material = pdf.splitTextToSize(textoCurto(item.material, 70), cfg.w - 8);
@@ -1887,7 +1887,7 @@
         const lista = getListaPainelFiltrada();
 
         if (!lista.length) {
-          mostrarMensagem("Nenhum dado disponÃ­vel para exportaÃ§Ã£o.", "warn");
+          mostrarMensagem("Nenhum dado disponível para exportação.", "warn");
           return;
         }
 
@@ -1898,7 +1898,7 @@
         const remessaId = lista[0].remessaId;
 
         pdf.setFontSize(16);
-        pdf.text("RelatÃ³rio de Remessa", 14, y);
+        pdf.text("Relatório de Remessa", 14, y);
         y += 10;
 
         pdf.setFontSize(11);
@@ -1918,7 +1918,7 @@
           pdf.text(`Origem: ${item.origem}`, 18, y); y += 5;
           pdf.text(`Destino: ${item.destino}`, 18, y); y += 5;
           pdf.text(`Material: ${item.material || "-"}`, 18, y); y += 5;
-          pdf.text(`SaÃ­da: ${formatarData(item.saidaEm)}`, 18, y); y += 5;
+          pdf.text(`Saída: ${formatarData(item.saidaEm)}`, 18, y); y += 5;
           pdf.text(`Chegada: ${formatarData(item.chegadaEm)}`, 18, y); y += 5;
           pdf.text(`Descarte: ${formatarData(item.descarteEm)}`, 18, y); y += 5;
           pdf.text(`Tempo: ${formatarTempo(item.tempoMin)}`, 18, y); y += 8;
@@ -1928,10 +1928,10 @@
         });
 
         pdf.save(`relatorio-${remessaId}.pdf`);
-        mostrarMensagem("RelatÃ³rio PDF gerado com sucesso.", "ok");
+        mostrarMensagem("Relatório PDF gerado com sucesso.", "ok");
       } catch (error) {
         console.error(error);
-        mostrarMensagem("Erro ao exportar relatÃ³rio PDF.", "warn");
+        mostrarMensagem("Erro ao exportar relatório PDF.", "warn");
       }
     };
 
