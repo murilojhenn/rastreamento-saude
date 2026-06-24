@@ -554,6 +554,7 @@
           <button class="btn" onclick="criarRemessa()">Criar remessa</button>
           <button class="btn3" onclick="carregarEtiquetasUltimaRemessa()">Recarregar etiquetas</button>
           <button class="btn-danger" onclick="apagarUltimaRemessaTeste()">Apagar última remessa de teste</button>
+          <button class="btn-danger" onclick="apagarTodasRemessasTeste()">Apagar TODAS as remessas</button>
         </div>
 
         <div class="opcoes-etiqueta">
@@ -684,7 +685,7 @@
         <img id="previewFotoDescarteImg" class="preview-foto" alt="Prévia da foto do descarte" />
 
         <div class="linha-auto">
-          <button class="btn" onclick="registrarDescarteManual()">Registrar descarte manual</button>
+          <button class="btn" onclick="registrarDescarteManual()">Confirmar descarte com foto</button>
           <button class="btn2" onclick="iniciarLeitorDescarte()">Ler QR pela câmera</button>
           <button class="btn3" onclick="pararLeitorDescarte()">Parar leitor</button>
           <button class="btn2" onclick="gerarCDFPorCodigo()">Gerar CDF</button>
@@ -1417,7 +1418,34 @@
         const codigoTratado = (codigo || "").trim();
 
         if (!codigoTratado) {
-          mostrarMensagem("Informe o código.", "warn");
+          mostrarMensagem("Informe o código do volume.", "warn");
+          return;
+        }
+
+        const item = await buscarVolumePorCodigo(codigoTratado);
+
+        if (!item) {
+          mostrarMensagem("Código não encontrado. Confira se copiou/bipou o código completo.", "warn");
+          return;
+        }
+
+        if (item.status === "AGUARDANDO") {
+          mostrarMensagem("Esse volume ainda está AGUARDANDO. Primeiro registre a saída e depois a chegada.", "warn");
+          return;
+        }
+
+        if (item.status === "EM TRANSPORTE") {
+          mostrarMensagem("Esse volume está EM TRANSPORTE. Primeiro registre a chegada.", "warn");
+          return;
+        }
+
+        if (item.status === "DESCARTADO") {
+          mostrarMensagem(`Esse volume já está marcado como DESCARTADO desde ${formatarData(item.descarteEm)}.`, "warn");
+          return;
+        }
+
+        if (item.status !== "ENTREGUE") {
+          mostrarMensagem(`Status atual inválido para descarte: ${item.status || "sem status"}.`, "warn");
           return;
         }
 
@@ -1425,33 +1453,6 @@
 
         if (!fotoBase64) {
           mostrarMensagem("Tire ou selecione a foto do produto/material antes do descarte.", "warn");
-          return;
-        }
-
-        const item = await buscarVolumePorCodigo(codigoTratado);
-
-        if (!item) {
-          mostrarMensagem("Código não encontrado.", "warn");
-          return;
-        }
-
-        if (!validarTransicaoStatus(item.status, "DESCARTADO")) {
-          if (item.status === "AGUARDANDO") {
-            mostrarMensagem("Esse volume ainda não teve saída nem chegada.", "warn");
-            return;
-          }
-
-          if (item.status === "EM TRANSPORTE") {
-            mostrarMensagem("Esse volume ainda não teve chegada.", "warn");
-            return;
-          }
-
-          if (item.status === "DESCARTADO") {
-            mostrarMensagem("Esse volume já foi descartado.", "warn");
-            return;
-          }
-
-          mostrarMensagem("Transição de status inválida.", "warn");
           return;
         }
 
@@ -1471,10 +1472,10 @@
         document.getElementById("previewFotoDescarteImg").style.display = "none";
         document.getElementById("previewFotoDescarteImg").src = "";
 
-        mostrarMensagem("Descarte registrado com foto e CDF vinculado.", "ok");
+        mostrarMensagem("Descarte registrado com sucesso. Agora o CDF pode ser gerado.", "ok");
       } catch (error) {
         console.error(error);
-        mostrarMensagem(error.message || "Erro ao registrar descarte.", "warn");
+        mostrarMensagem(error.message || "Erro ao registrar descarte. Se a foto for muito pesada, tire uma foto mais simples.", "warn");
       }
     }
 
@@ -1801,6 +1802,7 @@
           </div>
           <div style="margin-top:10px;">
             <button class="btn3" onclick="selecionarRemessaHistorico('${remessa.remessaId}')">Ver no painel</button>
+            ${usuarioAtual?.perfil === "admin" ? `<button class="btn-danger" onclick="apagarRemessaHistorico('${remessa.remessaId}')">Apagar remessa</button>` : ""}
           </div>
         `;
         area.appendChild(div);
@@ -1811,6 +1813,73 @@
       document.getElementById("filtroRemessa").value = remessaId;
       mostrarSecao("painel");
       atualizarPainel();
+    };
+
+    window.apagarRemessaHistorico = async function(remessaId) {
+      try {
+        if (usuarioAtual?.perfil !== "admin") {
+          mostrarMensagem("Apenas administrador pode apagar remessas.", "warn");
+          return;
+        }
+
+        const volumes = todosVolumes.filter(v => v.remessaId === remessaId);
+
+        if (!volumes.length) {
+          mostrarMensagem("Nenhum volume encontrado para apagar.", "warn");
+          return;
+        }
+
+        const confirmar = confirm(`Apagar a remessa ${remessaId} com ${volumes.length} volume(s)? Essa ação não volta.`);
+        if (!confirmar) return;
+
+        for (const item of volumes) {
+          await deleteDoc(doc(db, "volumes", item.id));
+        }
+
+        if (localStorage.getItem("ultimaRemessaId") === remessaId) {
+          localStorage.removeItem("ultimaRemessaId");
+        }
+
+        mostrarMensagem("Remessa apagada com sucesso.", "ok");
+      } catch (error) {
+        console.error(error);
+        mostrarMensagem("Erro ao apagar remessa.", "warn");
+      }
+    };
+
+    window.apagarTodasRemessasTeste = async function() {
+      try {
+        if (usuarioAtual?.perfil !== "admin") {
+          mostrarMensagem("Apenas administrador pode apagar remessas.", "warn");
+          return;
+        }
+
+        if (!todosVolumes.length) {
+          mostrarMensagem("Não há remessas para apagar.", "info");
+          return;
+        }
+
+        const confirmar1 = confirm(`ATENÇÃO: apagar TODAS as remessas e volumes do sistema? Total: ${todosVolumes.length} volume(s).`);
+        if (!confirmar1) return;
+
+        const confirmar2 = confirm("Confirma mesmo? Isso apaga o histórico inteiro do Firestore.");
+        if (!confirmar2) return;
+
+        for (const item of todosVolumes) {
+          await deleteDoc(doc(db, "volumes", item.id));
+        }
+
+        localStorage.removeItem("ultimaRemessaId");
+        document.getElementById("notaInternaBox")?.classList.add("hidden");
+        document.getElementById("etiquetasBox")?.classList.add("hidden");
+        document.getElementById("notaInterna").innerHTML = "";
+        document.getElementById("listaEtiquetas").innerHTML = "";
+
+        mostrarMensagem("Todas as remessas foram apagadas.", "ok");
+      } catch (error) {
+        console.error(error);
+        mostrarMensagem("Erro ao apagar todas as remessas.", "warn");
+      }
     };
 
     window.limparFiltrosPainel = function () {
