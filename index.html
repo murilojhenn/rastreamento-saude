@@ -253,7 +253,6 @@
     }
 
     th { background: #f8fafc; }
-
     tr:hover td { background: #fbfdff; }
 
     #readerSaida, #readerChegada, #readerDescarte {
@@ -315,7 +314,6 @@
       border: 1px dashed #d1d5db;
     }
 
-
     .opcoes-etiqueta {
       margin-top: 14px;
       padding: 14px;
@@ -351,16 +349,8 @@
       margin-bottom: 6px;
     }
 
-    .etiqueta-remessa {
-      font-size: 20px;
-      font-weight: 900;
-    }
-
-    .etiqueta-volume {
-      font-size: 18px;
-      font-weight: 900;
-      text-align: right;
-    }
+    .etiqueta-remessa { font-size: 20px; font-weight: 900; }
+    .etiqueta-volume { font-size: 18px; font-weight: 900; text-align: right; }
 
     .etiqueta-linha {
       margin: 5px 0;
@@ -412,14 +402,49 @@
       border-radius: 8px;
     }
 
-    @media print {
-      body * {
-        visibility: hidden;
-      }
+    .documento-box {
+      margin-top: 14px;
+      padding: 14px;
+      border-radius: 14px;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+    }
 
-      #areaImpressao, #areaImpressao * {
-        visibility: visible;
-      }
+    .documento-box h3 { margin-bottom: 6px; }
+
+    .selo-documento {
+      width: 98px;
+      height: 98px;
+      border: 3px solid #0f766e;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      color: #0f766e;
+      font-weight: 900;
+      font-size: 11px;
+      line-height: 1.15;
+      background: #ecfdf5;
+      margin-top: 8px;
+    }
+
+    .preview-foto {
+      max-width: 260px;
+      max-height: 220px;
+      border-radius: 12px;
+      border: 1px solid #cbd5e1;
+      margin-top: 8px;
+      margin-bottom: 12px;
+      display: none;
+      background: #fff;
+      padding: 4px;
+    }
+
+    @media print {
+      body * { visibility: hidden; }
+
+      #areaImpressao, #areaImpressao * { visibility: visible; }
 
       #areaImpressao {
         position: absolute;
@@ -429,11 +454,7 @@
         background: #fff;
       }
 
-      .print-grid {
-        display: grid;
-        gap: 4mm;
-      }
-
+      .print-grid { display: grid; gap: 4mm; }
       .print-50x30 { grid-template-columns: repeat(3, 50mm); }
       .print-70x40 { grid-template-columns: repeat(2, 70mm); }
       .print-100x50 { grid-template-columns: repeat(1, 100mm); }
@@ -459,9 +480,7 @@
       .print-100x50 .etiqueta-qr canvas,
       .print-a4 .etiqueta-qr canvas { width: 75px !important; height: 75px !important; }
 
-      button, .topo, .top-actions, .opcoes-etiqueta {
-        display: none !important;
-      }
+      button, .topo, .top-actions, .opcoes-etiqueta { display: none !important; }
     }
 
     @media (max-width: 700px) {
@@ -478,7 +497,7 @@
 <body>
   <div class="topo">
     <h1>Sistema de Rastreamento Hospitalar</h1>
-    <p>Controle interno de remessas, volumes, saída, chegada, descarte e divergências</p>
+    <p>Controle interno de remessas, volumes, saída, chegada, descarte, MTR, CDF e divergências</p>
   </div>
 
   <div class="container">
@@ -625,6 +644,13 @@
           <button class="btn" onclick="registrarSaidaManual()">Registrar saída manual</button>
           <button class="btn2" onclick="iniciarLeitorSaida()">Ler QR pela câmera</button>
           <button class="btn3" onclick="pararLeitorSaida()">Parar leitor</button>
+          <button class="btn2" onclick="gerarMTRPorCodigo()">Gerar MTR</button>
+        </div>
+
+        <div class="documento-box">
+          <h3>MTR - Manifesto de Transporte de Resíduos</h3>
+          <p class="subtitulo">Documento interno de acompanhamento da remessa/volume durante o transporte.</p>
+          <div class="selo-documento">CONTROLE<br>INTERNO<br>MTR</div>
         </div>
 
         <div id="readerSaida"></div>
@@ -653,10 +679,21 @@
         <label for="codigoDescarte">Código manual</label>
         <input id="codigoDescarte" placeholder="Código manual" />
 
+        <label for="fotoDescarte">Foto do produto/material a ser descartado</label>
+        <input id="fotoDescarte" type="file" accept="image/*" capture="environment" onchange="previewFotoDescarte()" />
+        <img id="previewFotoDescarteImg" class="preview-foto" alt="Prévia da foto do descarte" />
+
         <div class="linha-auto">
           <button class="btn" onclick="registrarDescarteManual()">Registrar descarte manual</button>
           <button class="btn2" onclick="iniciarLeitorDescarte()">Ler QR pela câmera</button>
           <button class="btn3" onclick="pararLeitorDescarte()">Parar leitor</button>
+          <button class="btn2" onclick="gerarCDFPorCodigo()">Gerar CDF</button>
+        </div>
+
+        <div class="documento-box">
+          <h3>CDF - Certificado de Destinação Final</h3>
+          <p class="subtitulo">Documento interno vinculado ao descarte final, com foto, responsável e conferência.</p>
+          <div class="selo-documento">CONTROLE<br>INTERNO<br>CDF</div>
         </div>
 
         <div id="readerDescarte"></div>
@@ -807,7 +844,6 @@
       const m = minutos % 60;
       return h > 0 ? `${h}h ${m}min` : `${m} min`;
     }
-
 
     function referenciaRemessa(remessaId) {
       const somenteNumeros = String(remessaId || "").replace(/\D/g, "");
@@ -1134,6 +1170,9 @@
             saidaEm: null,
             chegadaEm: null,
             descarteEm: null,
+            descartePor: null,
+            fotoDescarte: null,
+            numeroCDF: null,
             tempoMin: null
           });
         }
@@ -1283,7 +1322,8 @@
 
         await updateDoc(doc(db, "volumes", item.id), {
           status: "EM TRANSPORTE",
-          saidaEm: Date.now()
+          saidaEm: Date.now(),
+          saidaPor: usuarioAtual?.nome || "-"
         });
 
         document.getElementById("codigoSaida").value = "";
@@ -1328,6 +1368,7 @@
         await updateDoc(doc(db, "volumes", item.id), {
           status: "ENTREGUE",
           chegadaEm: agora,
+          chegadaPor: usuarioAtual?.nome || "-",
           tempoMin
         });
 
@@ -1339,15 +1380,56 @@
       }
     }
 
+    function lerFotoDescarteBase64() {
+      return new Promise((resolve, reject) => {
+        const input = document.getElementById("fotoDescarte");
+        const file = input?.files?.[0];
+
+        if (!file) {
+          resolve(null);
+          return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = () => reject(new Error("Erro ao ler foto."));
+        reader.readAsDataURL(file);
+      });
+    }
+
+    window.previewFotoDescarte = function () {
+      const input = document.getElementById("fotoDescarte");
+      const img = document.getElementById("previewFotoDescarteImg");
+      const file = input?.files?.[0];
+
+      if (!file) {
+        img.style.display = "none";
+        img.src = "";
+        return;
+      }
+
+      img.src = URL.createObjectURL(file);
+      img.style.display = "block";
+    };
+
     async function registrarDescarte(codigo) {
       try {
         const codigoTratado = (codigo || "").trim();
+
         if (!codigoTratado) {
           mostrarMensagem("Informe o código.", "warn");
           return;
         }
 
+        const fotoBase64 = await lerFotoDescarteBase64();
+
+        if (!fotoBase64) {
+          mostrarMensagem("Tire ou selecione a foto do produto/material antes do descarte.", "warn");
+          return;
+        }
+
         const item = await buscarVolumePorCodigo(codigoTratado);
+
         if (!item) {
           mostrarMensagem("Código não encontrado.", "warn");
           return;
@@ -1358,26 +1440,38 @@
             mostrarMensagem("Esse volume ainda não teve saída nem chegada.", "warn");
             return;
           }
+
           if (item.status === "EM TRANSPORTE") {
             mostrarMensagem("Esse volume ainda não teve chegada.", "warn");
             return;
           }
+
           if (item.status === "DESCARTADO") {
             mostrarMensagem("Esse volume já foi descartado.", "warn");
             return;
           }
+
           mostrarMensagem("Transição de status inválida.", "warn");
           return;
         }
 
+        const agora = Date.now();
+        const numeroCDF = `CDF-${agora}`;
+
         await updateDoc(doc(db, "volumes", item.id), {
           status: "DESCARTADO",
-          descarteEm: Date.now(),
-          descartePor: usuarioAtual?.nome || "-"
+          descarteEm: agora,
+          descartePor: usuarioAtual?.nome || "-",
+          fotoDescarte: fotoBase64,
+          numeroCDF
         });
 
         document.getElementById("codigoDescarte").value = "";
-        mostrarMensagem("Descarte registrado com sucesso.", "ok");
+        document.getElementById("fotoDescarte").value = "";
+        document.getElementById("previewFotoDescarteImg").style.display = "none";
+        document.getElementById("previewFotoDescarteImg").src = "";
+
+        mostrarMensagem("Descarte registrado com foto e CDF vinculado.", "ok");
       } catch (error) {
         console.error(error);
         mostrarMensagem(error.message || "Erro ao registrar descarte.", "warn");
@@ -1474,7 +1568,7 @@
 
             document.getElementById("codigoDescarte").value = decodedText;
             await pararLeitorDescarte();
-            await registrarDescarte(decodedText);
+            mostrarMensagem("QR lido. Agora tire a foto e confirme o descarte.", "info");
           },
           () => {}
         );
@@ -1725,7 +1819,6 @@
       atualizarPainel();
     };
 
-
     window.imprimirEtiquetas = async function () {
       try {
         const remessaId = localStorage.getItem("ultimaRemessaId");
@@ -1882,6 +1975,156 @@
       }
     };
 
+    window.gerarMTRPorCodigo = async function () {
+      try {
+        const codigo = document.getElementById("codigoSaida").value.trim();
+
+        if (!codigo) {
+          mostrarMensagem("Informe ou leia um código para gerar o MTR.", "warn");
+          return;
+        }
+
+        const item = await buscarVolumePorCodigo(codigo);
+
+        if (!item) {
+          mostrarMensagem("Código não encontrado para gerar MTR.", "warn");
+          return;
+        }
+
+        const { jsPDF } = window.jspdf;
+        const pdf = new jsPDF("p", "mm", "a4");
+        const numeroMTR = `MTR-${Date.now()}`;
+
+        let y = 18;
+
+        pdf.setFontSize(16);
+        pdf.text("MTR - Manifesto de Transporte de Resíduos", 14, y);
+        y += 12;
+
+        pdf.setDrawColor(15, 118, 110);
+        pdf.circle(170, 25, 15);
+        pdf.setFontSize(8);
+        pdf.setTextColor(15, 118, 110);
+        pdf.text("CONTROLE", 170, 21, { align: "center" });
+        pdf.text("INTERNO", 170, 25, { align: "center" });
+        pdf.text("MTR", 170, 29, { align: "center" });
+        pdf.setTextColor(0, 0, 0);
+
+        pdf.setFontSize(11);
+        pdf.text(`Nº MTR: ${numeroMTR}`, 14, y); y += 7;
+        pdf.text(`Data de emissão: ${new Date().toLocaleString("pt-BR")}`, 14, y); y += 7;
+        pdf.text(`Remessa: ${item.remessaId}`, 14, y); y += 7;
+        pdf.text(`Código do volume: ${item.codigo}`, 14, y); y += 7;
+        pdf.text(`Volume: ${item.volumeEtiqueta || "-"}`, 14, y); y += 7;
+        pdf.text(`Origem: ${item.origem || "-"}`, 14, y); y += 7;
+        pdf.text(`Destino: ${item.destino || "-"}`, 14, y); y += 7;
+        pdf.text(`Cidade: ${item.cidade || "-"}`, 14, y); y += 7;
+        pdf.text(`Material: ${item.material || "-"}`, 14, y); y += 7;
+        pdf.text(`Quantidade total de volumes: ${item.quantidadeVolumes || "-"}`, 14, y); y += 7;
+        pdf.text(`Responsável: ${item.responsavel || "-"}`, 14, y); y += 7;
+        pdf.text(`Operador de saída: ${usuarioAtual?.nome || "-"}`, 14, y); y += 14;
+
+        pdf.setFontSize(10);
+        pdf.text("Observação: documento interno de acompanhamento. O MTR oficial deve seguir o sistema ambiental exigido.", 14, y);
+        y += 16;
+
+        pdf.text("Assinatura do responsável pela saída:", 14, y);
+        y += 18;
+        pdf.line(14, y, 120, y);
+
+        pdf.save(`${numeroMTR}-${item.codigo}.pdf`);
+        mostrarMensagem("MTR gerado com sucesso.", "ok");
+      } catch (error) {
+        console.error(error);
+        mostrarMensagem("Erro ao gerar MTR.", "warn");
+      }
+    };
+
+    window.gerarCDFPorCodigo = async function () {
+      try {
+        const codigo = document.getElementById("codigoDescarte").value.trim();
+
+        if (!codigo) {
+          mostrarMensagem("Informe ou leia um código para gerar o CDF.", "warn");
+          return;
+        }
+
+        const item = await buscarVolumePorCodigo(codigo);
+
+        if (!item) {
+          mostrarMensagem("Código não encontrado para gerar CDF.", "warn");
+          return;
+        }
+
+        if (item.status !== "DESCARTADO") {
+          mostrarMensagem("O CDF só pode ser gerado após o descarte.", "warn");
+          return;
+        }
+
+        const { jsPDF } = window.jspdf;
+        const pdf = new jsPDF("p", "mm", "a4");
+
+        const numeroCDF = item.numeroCDF || `CDF-${Date.now()}`;
+
+        let y = 18;
+
+        pdf.setFontSize(16);
+        pdf.text("CDF - Certificado de Destinação Final", 14, y);
+        y += 12;
+
+        pdf.setDrawColor(15, 118, 110);
+        pdf.circle(170, 25, 15);
+        pdf.setFontSize(8);
+        pdf.setTextColor(15, 118, 110);
+        pdf.text("CONTROLE", 170, 21, { align: "center" });
+        pdf.text("INTERNO", 170, 25, { align: "center" });
+        pdf.text("CDF", 170, 29, { align: "center" });
+        pdf.setTextColor(0, 0, 0);
+
+        pdf.setFontSize(11);
+        pdf.text(`Nº CDF: ${numeroCDF}`, 14, y); y += 7;
+        pdf.text(`Data de emissão: ${new Date().toLocaleString("pt-BR")}`, 14, y); y += 7;
+        pdf.text(`Remessa: ${item.remessaId}`, 14, y); y += 7;
+        pdf.text(`Código do volume: ${item.codigo}`, 14, y); y += 7;
+        pdf.text(`Volume: ${item.volumeEtiqueta || "-"}`, 14, y); y += 7;
+        pdf.text(`Origem: ${item.origem || "-"}`, 14, y); y += 7;
+        pdf.text(`Destino: ${item.destino || "-"}`, 14, y); y += 7;
+        pdf.text(`Material destinado: ${item.material || "-"}`, 14, y); y += 7;
+        pdf.text(`Responsável: ${item.responsavel || "-"}`, 14, y); y += 7;
+        pdf.text(`Descartado por: ${item.descartePor || "-"}`, 14, y); y += 7;
+        pdf.text(`Data do descarte: ${formatarData(item.descarteEm)}`, 14, y); y += 12;
+
+        if (item.fotoDescarte) {
+          pdf.text("Foto do material descartado:", 14, y);
+          y += 5;
+          try {
+            pdf.addImage(item.fotoDescarte, "JPEG", 14, y, 75, 55);
+          } catch (e) {
+            try {
+              pdf.addImage(item.fotoDescarte, "PNG", 14, y, 75, 55);
+            } catch (err) {
+              pdf.text("Foto anexada, mas não foi possível renderizar no PDF.", 14, y + 8);
+            }
+          }
+          y += 65;
+        }
+
+        pdf.setFontSize(10);
+        pdf.text("Certificamos, para controle interno, que o material acima foi registrado como destinado/descartado.", 14, y);
+        y += 16;
+
+        pdf.text("Assinatura / conferência da destinação final:", 14, y);
+        y += 18;
+        pdf.line(14, y, 130, y);
+
+        pdf.save(`${numeroCDF}-${item.codigo}.pdf`);
+        mostrarMensagem("CDF gerado com sucesso.", "ok");
+      } catch (error) {
+        console.error(error);
+        mostrarMensagem("Erro ao gerar CDF.", "warn");
+      }
+    };
+
     window.exportarRelatorioPDF = async function () {
       try {
         const lista = getListaPainelFiltrada();
@@ -1921,6 +2164,7 @@
           pdf.text(`Saída: ${formatarData(item.saidaEm)}`, 18, y); y += 5;
           pdf.text(`Chegada: ${formatarData(item.chegadaEm)}`, 18, y); y += 5;
           pdf.text(`Descarte: ${formatarData(item.descarteEm)}`, 18, y); y += 5;
+          pdf.text(`CDF: ${item.numeroCDF || "-"}`, 18, y); y += 5;
           pdf.text(`Tempo: ${formatarTempo(item.tempoMin)}`, 18, y); y += 8;
 
           pdf.line(14, y, 195, y);
