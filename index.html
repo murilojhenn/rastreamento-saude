@@ -757,6 +757,11 @@
       <div id="secaoHistorico" class="card hidden">
         <h2>Histórico de remessas</h2>
         <p class="subtitulo">Visualize rapidamente remessas já criadas no sistema</p>
+
+        <div class="linha-auto" style="margin-bottom:12px;">
+          <button class="btn-danger" onclick="apagarTodasRemessasTeste()">Limpar histórico inteiro</button>
+        </div>
+
         <div id="listaHistorico" class="historico-lista"></div>
       </div>
     </div>
@@ -1392,7 +1397,39 @@
         }
 
         const reader = new FileReader();
-        reader.onload = () => resolve(reader.result);
+
+        reader.onload = () => {
+          const img = new Image();
+
+          img.onload = () => {
+            const canvas = document.createElement("canvas");
+            const maxLado = 700;
+
+            let largura = img.width;
+            let altura = img.height;
+
+            if (largura > altura && largura > maxLado) {
+              altura = Math.round((altura * maxLado) / largura);
+              largura = maxLado;
+            } else if (altura > maxLado) {
+              largura = Math.round((largura * maxLado) / altura);
+              altura = maxLado;
+            }
+
+            canvas.width = largura;
+            canvas.height = altura;
+
+            const ctx = canvas.getContext("2d");
+            ctx.drawImage(img, 0, 0, largura, altura);
+
+            const fotoComprimida = canvas.toDataURL("image/jpeg", 0.55);
+            resolve(fotoComprimida);
+          };
+
+          img.onerror = () => reject(new Error("Erro ao processar foto."));
+          img.src = reader.result;
+        };
+
         reader.onerror = () => reject(new Error("Erro ao ler foto."));
         reader.readAsDataURL(file);
       });
@@ -1475,7 +1512,11 @@
         mostrarMensagem("Descarte registrado com sucesso. Agora o CDF pode ser gerado.", "ok");
       } catch (error) {
         console.error(error);
-        mostrarMensagem(error.message || "Erro ao registrar descarte. Se a foto for muito pesada, tire uma foto mais simples.", "warn");
+        if (String(error.message || "").includes("longer than")) {
+          mostrarMensagem("A foto ainda ficou pesada demais. Tire uma foto mais simples, de mais longe ou com menos detalhes.", "warn");
+        } else {
+          mostrarMensagem(error.message || "Erro ao registrar descarte.", "warn");
+        }
       }
     }
 
